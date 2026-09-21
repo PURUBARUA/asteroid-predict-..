@@ -1,7 +1,7 @@
 {
-  "name": "nasa-eyes-on-asteroids-2026-rz1",
+  "name": "cosmic-orbit-asteroid-watch",
   "version": "1.0.0",
-  "description": "Interactive 3D NASA Eyes on Asteroids (2026 RZ1 Watch) & Planetary Defense Educational Platform with Machine Learning Hazard Assessment",
+  "description": "Interactive 3D Solar System & Asteroid Watch (2026 RZ1) Educational Platform with Machine Learning Hazard Assessment",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -9,16 +9,15 @@
     "preview": "vite preview"
   },
   "keywords": [
-    "nasa",
-    "eyes-on-asteroids",
+    "solar-system",
+    "moons",
+    "asteroids",
     "planetary-defense",
     "threejs",
     "webgl",
     "orbital-mechanics",
     "machine-learning",
-    "2026-rz1",
-    "cneos",
-    "jpl"
+    "2026-rz1"
   ],
   "author": "Aerospace Technologist & Planetary Defense Researcher",
   "license": "MIT",

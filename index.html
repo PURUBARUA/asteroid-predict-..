@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>NASA Eyes on Asteroids | 2026 RZ1 Watch &amp; Planetary Defense</title>
-  <meta name="description" content="Interactive 3D NASA Eyes on Asteroids simulation, close approach watch for 2026 RZ1, zoomable Earth, Keplerian orbital mechanics lab, and machine learning impact hazard predictor.">
+  <title>Cosmic Orbit // Eyes on Asteroids &amp; Solar System Dynamics</title>
+  <meta name="description" content="Interactive 3D Solar System and Asteroid Watch exploration platform. Real-time planetary orbits, 20+ major moons, 2026 RZ1 close approach, Keplerian mechanics, and ML hazard prediction.">
   <link rel="stylesheet" href="./src/styles/main.css">
   <link rel="icon" type="image/svg+xml" href="./favicon.svg">
 </head>
@@ -13,52 +13,35 @@
   <!-- WebGL 3D Canvas Viewport -->
   <div id="canvas-container"></div>
 
-  <!-- Dynamic 3D Projected Screen Labels -->
-  <div id="label-earth" class="floating-3d-label">
-    <div class="label-content">
-      <span class="label-dot"></span> Earth
-    </div>
-    <div class="label-pointer"></div>
-  </div>
-
-  <div id="label-asteroid" class="floating-3d-label">
-    <div class="label-content">
-      <span class="label-dot asteroid"></span> <span id="label-asteroid-text">2026 RZ1</span>
-    </div>
-    <div class="label-pointer"></div>
-  </div>
-
-  <div id="label-moon" class="floating-3d-label">
-    <div class="label-content">
-      <span class="label-dot" style="background: #94a3b8; box-shadow: none;"></span> Moon (1 LD)
-    </div>
-    <div class="label-pointer"></div>
-  </div>
+  <!-- Dynamic 3D Projected Screen Labels Container (Sun, Planets, Moons, Asteroid) -->
+  <div id="labels-container"></div>
 
   <!-- HUD Master Overlay -->
   <div class="hud-overlay">
 
-    <!-- Top Header (Official NASA Eyes on Asteroids Style) -->
+    <!-- Top Header (Independent Cosmic Orbit Style) -->
     <header class="hud-header">
       <div class="brand-section">
-        <div class="nasa-meatball" title="NASA Jet Propulsion Laboratory">
-          <div class="nasa-meatball-orbit"></div>
-          <span class="nasa-meatball-text">NASA</span>
+        <!-- Cosmic Gyroscope Emblem -->
+        <div class="cosmic-emblem" title="Cosmic Orbit Planetary Defense">
+          <div class="cosmic-emblem-core"></div>
+          <div class="cosmic-emblem-ring1"></div>
+          <div class="cosmic-emblem-ring2"></div>
         </div>
 
         <div class="brand-titles">
           <div class="brand-title-wrap">
-            <span class="brand-title">Eyes on Asteroids</span>
-            <span class="badge-watch-mode">ASTEROID WATCH</span>
+            <span class="brand-title">Cosmic Orbit</span>
+            <span class="badge-watch-mode">SOLAR SYSTEM &amp; ASTEROID WATCH</span>
           </div>
-          <span class="brand-sub">Center for Near-Earth Object Studies &bull; JPL Caltech</span>
+          <span class="brand-sub">Planetary Defense Coordination &bull; Deep Space Dynamics Lab</span>
         </div>
       </div>
 
       <!-- Live Search Bar -->
       <div class="header-search-wrap">
         <svg class="search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        <input type="text" id="header-search-input" class="header-search-input" placeholder="Search 2026 RZ1, Apophis, Bennu..." title="Search Asteroid Database">
+        <input type="text" id="header-search-input" class="header-search-input" placeholder="Search planet, moon, or asteroid..." title="Search Solar System &amp; Asteroids">
       </div>
 
       <!-- Live Telemetry Clocks -->
@@ -77,9 +60,9 @@
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
           ML PREDICTOR
         </button>
-        <button id="btn-open-compliance" class="hud-btn" title="View NASA Open Data Attribution &amp; Aerospace Portfolio">
+        <button id="btn-open-compliance" class="hud-btn" title="View Science Data Attribution &amp; Aerospace Portfolio">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
-          NASA DATA &amp; BIO
+          DATA &amp; BIO
         </button>
         <button id="btn-sound-toggle" class="hud-btn" title="Toggle Audio FX">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
@@ -90,7 +73,7 @@
     <!-- Center HUD (Asteroid Watch Card + View Controls) -->
     <main class="hud-middle">
 
-      <!-- Official NASA Asteroid Watch Card -->
+      <!-- Official Asteroid Watch Card -->
       <section class="asteroid-watch-card">
         <div class="watch-card-header">
           <div>
@@ -104,7 +87,7 @@
           </div>
         </div>
 
-        <!-- 4 Essential NASA Watch Metrics -->
+        <!-- 4 Essential Watch Metrics -->
         <div class="metrics-4grid">
           <!-- Metric 1: Next Pass -->
           <div class="metric-box">
@@ -135,7 +118,7 @@
           </div>
         </div>
 
-        <!-- Signature NASA Lunar Distance Visual Gauge Bar -->
+        <!-- Signature Lunar Distance Visual Gauge Bar -->
         <div class="lunar-distance-gauge">
           <div class="gauge-header">
             <span>EARTH ENCOUNTER PROXIMITY GAUGE</span>
@@ -151,16 +134,31 @@
 
         <!-- Narrative brief -->
         <div id="hud-narrative-brief" class="narrative-brief">
-          Discovered during automated deep-sky planetary defense surveys, 2026 RZ1 makes an exceptionally close, photogenic encounter with Earth on September 12, 2026, passing well inside the Moon's orbit at 0.46 Lunar Distances (176,800 km). Highly monitored by NASA Goldstone Deep Space Communications Complex.
+          Discovered during automated deep-sky planetary defense surveys, 2026 RZ1 makes an exceptionally close, photogenic encounter with Earth on September 12, 2026, passing well inside the Moon's orbit at 0.46 Lunar Distances (176,800 km). Highly monitored by deep space radar communications networks.
         </div>
       </section>
 
       <!-- Right View & Layer Controls -->
       <aside class="controls-card">
-        <div class="panel-subhead">VIEW MODE</div>
+        <div class="panel-subhead">SOLAR SYSTEM TARGET</div>
+        <select id="solar-body-select" class="styled-select" title="Focus Planet or Sun">
+          <option value="earth" selected>Earth &amp; Moon</option>
+          <option value="sun">The Sun</option>
+          <option value="mercury">Mercury</option>
+          <option value="venus">Venus</option>
+          <option value="mars">Mars (Phobos, Deimos)</option>
+          <option value="jupiter">Jupiter (Io, Europa, Ganymede, Callisto)</option>
+          <option value="saturn">Saturn (Titan, Enceladus, Rings)</option>
+          <option value="uranus">Uranus (Titania, Oberon)</option>
+          <option value="neptune">Neptune (Triton, Proteus)</option>
+          <option value="pluto">Pluto &amp; Charon</option>
+          <option value="asteroid">Asteroid 2026 RZ1</option>
+        </select>
+
+        <div class="panel-subhead" style="margin-top: 8px;">VIEW MODE</div>
         <div class="view-btn-group">
-          <button id="btn-view-geo" class="hud-btn active">GEOCENTRIC (ENCOUNTER)</button>
-          <button id="btn-view-helio" class="hud-btn">HELIOCENTRIC (SOLAR SYSTEM)</button>
+          <button id="btn-view-geo" class="hud-btn active">CLOSE ENCOUNTER VIEW</button>
+          <button id="btn-view-helio" class="hud-btn">FULL SOLAR SYSTEM</button>
           <button id="btn-focus-asteroid" class="hud-btn">LOCK ON ASTEROID</button>
           <button id="btn-focus-earth" class="hud-btn">RESET CAMERA</button>
         </div>
@@ -175,8 +173,8 @@
         <div class="panel-subhead" style="margin-top: 6px;">LAYERS</div>
         <div class="layer-toggles">
           <label><input type="checkbox" id="toggle-orbits" checked> Orbit Lines</label>
-          <label><input type="checkbox" id="toggle-moon" checked> Moon &amp; 1 LD Ring</label>
-          <label><input type="checkbox" id="toggle-satellites" checked> GEO / LEO Rings</label>
+          <label><input type="checkbox" id="toggle-moon" checked> Moons &amp; Orbit Rings</label>
+          <label><input type="checkbox" id="toggle-satellites" checked> Satellite Orbits</label>
         </div>
       </aside>
     </main>
@@ -231,7 +229,7 @@
       <div class="modal-body">
         <div class="lab-tabs">
           <button class="lab-tab-btn active" data-target="tab-kepler">1. KEPLERIAN ORBITS</button>
-          <button class="lab-tab-btn" data-target="tab-dart">2. DART KINETIC DEFLECTION</button>
+          <button class="lab-tab-btn" data-target="tab-dart">2. KINETIC DEFLECTION</button>
           <button class="lab-tab-btn" data-target="tab-crater">3. IMPACT CONSEQUENCES</button>
         </div>
 
@@ -277,10 +275,10 @@
           </div>
         </div>
 
-        <!-- Tab 2: DART Deflection -->
+        <!-- Tab 2: Deflection Simulator -->
         <div id="tab-dart" class="lab-tab-content">
           <p style="font-size: 12px; color: var(--text-secondary);">
-            Simulate NASA's Double Asteroid Redirection Test (DART) momentum transfer. See how momentum enhancement factor (&beta; &approx; 2.5) and warning lead time allow a small spacecraft to divert a multi-ton asteroid away from Earth.
+            Simulate planetary defense kinetic momentum transfer. See how momentum enhancement factor (&beta; &approx; 2.5) and warning lead time allow a spacecraft to divert a multi-ton asteroid away from Earth.
           </p>
 
           <div class="slider-group">
@@ -456,11 +454,11 @@
     </div>
   </div>
 
-  <!-- NASA OPEN DATA COMPLIANCE & AUTHOR BIO MODAL -->
+  <!-- SCIENCE DATA COMPLIANCE & AUTHOR BIO MODAL -->
   <div id="compliance-modal" class="modal-backdrop">
     <div class="modal-dialog">
       <div class="modal-header">
-        <h2>INSTITUTIONAL COMPLIANCE &amp; AEROSPACE PORTFOLIO</h2>
+        <h2>SCIENCE DATA PROVENANCE &amp; AEROSPACE PORTFOLIO</h2>
         <button id="btn-close-compliance" class="modal-close-btn">&times;</button>
       </div>
       <div class="modal-body">
@@ -471,40 +469,40 @@
           <div class="author-info">
             <h3>Aerospace Technologist &amp; Planetary Defense Researcher</h3>
             <p>
-              Lead Developer specializing in orbital astrodynamics, WebGL 3D deep-space telemetry visualizations, and machine learning impact hazard assessment tools designed to mirror NASA JPL and ESA operational standards.
+              Developer specializing in orbital astrodynamics, WebGL 3D deep-space telemetry visualizations, and machine learning impact hazard assessment tools designed to mirror international planetary defense standards.
             </p>
           </div>
         </div>
 
         <div>
           <h4 style="font-size: 12px; font-family: var(--font-mono); color: var(--text-purple-highlight); margin-bottom: 6px;">
-            DATA PROVENANCE &amp; NASA OPEN DATA POLICY COMPLIANCE
+            OPEN DATA SOURCES &amp; EPHEMERIS PROVENANCE
           </h4>
           <p style="font-size: 12px; color: var(--text-secondary); line-height: 1.5;">
-            This software strictly complies with the <strong>NASA Open Data Policy (17 U.S.C. &sect; 105)</strong> and is distributed under the MIT Open Source License. Planetary orbital data, close approach ephemerides, and asteroid parameters are ingested from:
+            This software is distributed under the MIT Open Source License. Planetary orbital data, close approach ephemerides, and asteroid parameters are ingested from public domain scientific databases:
           </p>
           <ul style="font-size: 12px; color: #cbd5e1; margin-left: 20px; margin-top: 6px; line-height: 1.6;">
-            <li><strong>NASA JPL Center for Near-Earth Object Studies (CNEOS)</strong></li>
-            <li><strong>NASA Planetary Defense Coordination Office (PDCO)</strong></li>
+            <li><strong>Center for Near-Earth Object Studies (CNEOS) Public Ephemeris</strong></li>
             <li><strong>International Astronomical Union (IAU) Minor Planet Center (MPC)</strong></li>
+            <li><strong>Planetary Defense Coordination Office (PDCO) Open Catalogs</strong></li>
           </ul>
           <p style="font-size: 11px; color: #64748b; margin-top: 8px; font-style: italic;">
-            Disclaimer: This project is an independent educational tool designed for students and aerospace researchers. It is not an official endorsement by NASA, JPL, or Caltech.
+            Disclaimer: This project is an independent educational tool designed for students, educators, and aerospace researchers.
           </p>
         </div>
 
         <div>
           <h4 style="font-size: 12px; font-family: var(--font-mono); color: var(--text-purple-highlight); margin-bottom: 6px;">
-            NASA API KEY CONFIGURATION (OPTIONAL)
+            OPEN ASTRONOMY API KEY CONFIGURATION (OPTIONAL)
           </h4>
           <p style="font-size: 11px; color: var(--text-secondary); margin-bottom: 8px;">
-            By default, public requests utilize NASA's shared DEMO_KEY. To increase hourly request limits to 1,000 req/hr, enter your free key from <a href="https://api.nasa.gov" target="_blank" rel="noopener" style="color: var(--color-purple-light);">api.nasa.gov</a>.
+            By default, public requests utilize standard open keys. To increase hourly request limits to 1,000 req/hr, enter your custom open science key below.
           </p>
           <div class="api-key-box">
-            <input type="text" id="input-nasa-api-key" class="styled-input" placeholder="Enter NASA API Key (e.g. DEMO_KEY)">
+            <input type="text" id="input-nasa-api-key" class="styled-input" placeholder="Enter Science API Key (e.g. DEMO_KEY)">
             <button id="btn-save-api-key" class="hud-btn active">SAVE KEY</button>
           </div>
-          <div id="api-key-status" style="font-size: 11px; color: var(--text-secondary); margin-top: 4px;">Public DEMO_KEY Active</div>
+          <div id="api-key-status" style="font-size: 11px; color: var(--text-secondary); margin-top: 4px;">Public Science Key Active</div>
         </div>
       </div>
     </div>

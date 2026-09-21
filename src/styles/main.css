@@ -1,10 +1,10 @@
 /* ==========================================================================
-   NASA EYES ON ASTEROIDS - OFFICIAL PURPLE-BLUE THEME & WATCH MODE INTERFACE
+   COSMIC ORBIT // SOLAR SYSTEM & ASTEROID WATCH - PURPLE-BLUE THEME
    ========================================================================== */
 
 :root {
-  /* NASA Cosmic Purple-Blue Palette */
-  --bg-deep-space: #030511;
+  /* Cosmic Purple-Blue Palette */
+  --bg-deep-space: #02030b;
   --bg-card: rgba(13, 17, 43, 0.82);
   --bg-card-hover: rgba(22, 28, 66, 0.92);
   --bg-card-solid: #0d122b;
@@ -64,11 +64,20 @@ body, html {
 }
 
 /* ==========================================================================
-   FLOATING 3D SCREEN LABELS (EARTH, MOON, ASTEROID)
+   DYNAMIC 3D LABELS (PLANETS, MOONS, SUN, ASTEROID)
    ========================================================================== */
+#labels-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 5;
+  pointer-events: none;
+}
+
 .floating-3d-label {
   position: absolute;
-  z-index: 5;
   pointer-events: none;
   transform: translate(-50%, -100%);
   display: flex;
@@ -76,7 +85,7 @@ body, html {
   align-items: center;
   gap: 3px;
   opacity: 0;
-  transition: opacity 0.3s ease;
+  transition: opacity 0.25s ease;
 }
 
 .floating-3d-label.visible {
@@ -85,7 +94,7 @@ body, html {
 
 .label-pointer {
   width: 1px;
-  height: 16px;
+  height: 14px;
   background: linear-gradient(180deg, var(--color-purple-light), transparent);
 }
 
@@ -93,12 +102,12 @@ body, html {
   background: rgba(13, 18, 43, 0.88);
   border: 1px solid var(--color-purple);
   border-radius: 4px;
-  padding: 4px 8px;
+  padding: 3px 7px;
   font-family: var(--font-mono);
   font-size: 11px;
   color: #fff;
   white-space: nowrap;
-  box-shadow: 0 0 14px rgba(139, 92, 246, 0.5);
+  box-shadow: 0 0 12px rgba(139, 92, 246, 0.45);
   display: flex;
   align-items: center;
   gap: 6px;
@@ -112,9 +121,31 @@ body, html {
   box-shadow: 0 0 6px var(--color-electric-blue);
 }
 
-.label-dot.asteroid {
+.floating-3d-label.planet .label-dot {
+  background: var(--color-electric-blue);
+  box-shadow: 0 0 8px var(--color-electric-blue);
+}
+
+.floating-3d-label.moon .label-dot {
+  background: #cbd5e1;
+  box-shadow: 0 0 5px #cbd5e1;
+}
+
+.floating-3d-label.moon .label-content {
+  font-size: 9px;
+  padding: 2px 5px;
+  border-color: rgba(139, 92, 246, 0.5);
+  background: rgba(15, 23, 50, 0.75);
+}
+
+.floating-3d-label.star .label-dot {
+  background: #facc15;
+  box-shadow: 0 0 10px #facc15;
+}
+
+.floating-3d-label.asteroid .label-dot {
   background: var(--color-purple-light);
-  box-shadow: 0 0 8px var(--color-purple-light);
+  box-shadow: 0 0 10px var(--color-purple-light);
 }
 
 /* ==========================================================================
@@ -134,7 +165,7 @@ body, html {
 }
 
 /* ==========================================================================
-   TOP HEADER (OFFICIAL NASA EYES STYLE)
+   TOP HEADER
    ========================================================================== */
 .hud-header {
   pointer-events: auto;
@@ -153,36 +184,50 @@ body, html {
   gap: 14px;
 }
 
-.nasa-meatball {
-  width: 38px;
-  height: 38px;
-  border-radius: 50%;
-  background: radial-gradient(circle at 35% 35%, #1e40af 0%, #0c1840 90%);
-  border: 1.5px solid var(--color-royal-blue);
-  box-shadow: 0 0 16px rgba(59, 130, 246, 0.5);
+/* Cosmic Gyroscope Emblem */
+.cosmic-emblem {
+  width: 36px;
+  height: 36px;
   position: relative;
   display: flex;
   justify-content: center;
   align-items: center;
-  overflow: hidden;
 }
 
-.nasa-meatball-text {
-  font-family: var(--font-sans);
-  font-weight: 900;
-  font-size: 10px;
-  letter-spacing: 1px;
-  color: #fff;
-  z-index: 2;
-}
-
-.nasa-meatball-orbit {
-  position: absolute;
-  width: 32px;
-  height: 12px;
-  border: 1.5px solid #ef4444;
+.cosmic-emblem-core {
+  width: 10px;
+  height: 10px;
   border-radius: 50%;
-  transform: rotate(-35deg);
+  background: var(--color-purple-light);
+  box-shadow: 0 0 12px var(--color-purple);
+}
+
+.cosmic-emblem-ring1 {
+  position: absolute;
+  width: 28px;
+  height: 14px;
+  border: 1.5px solid var(--color-electric-blue);
+  border-radius: 50%;
+  animation: spin-emblem-1 6s linear infinite;
+}
+
+.cosmic-emblem-ring2 {
+  position: absolute;
+  width: 34px;
+  height: 16px;
+  border: 1.5px solid var(--color-purple);
+  border-radius: 50%;
+  animation: spin-emblem-2 8s linear infinite reverse;
+}
+
+@keyframes spin-emblem-1 {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes spin-emblem-2 {
+  0% { transform: rotate(45deg); }
+  100% { transform: rotate(405deg); }
 }
 
 .brand-titles {
@@ -296,7 +341,7 @@ body, html {
 }
 
 /* ==========================================================================
-   CENTER HUD: ASTEROID WATCH DRAWER (OFFICIAL NASA FORMAT)
+   CENTER HUD: ASTEROID WATCH DRAWER
    ========================================================================== */
 .hud-middle {
   display: flex;
@@ -308,7 +353,6 @@ body, html {
   overflow: hidden;
 }
 
-/* ASTEROID WATCH CARD */
 .asteroid-watch-card {
   pointer-events: auto;
   width: 440px;
@@ -368,7 +412,7 @@ body, html {
   margin-top: 2px;
 }
 
-/* METRICS 4-GRID (NEXT PASS, DISTANCE, SPEED, SIZE) */
+/* METRICS 4-GRID */
 .metrics-4grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -405,7 +449,7 @@ body, html {
   color: var(--text-blue-highlight);
 }
 
-/* LUNAR DISTANCE GRAPHICAL COMPARISON BAR (SIGNATURE NASA EYES ELEMENT) */
+/* LUNAR DISTANCE GRAPHICAL COMPARISON BAR */
 .lunar-distance-gauge {
   background: rgba(18, 25, 60, 0.8);
   border: 1px solid rgba(139, 92, 246, 0.25);
@@ -464,7 +508,7 @@ body, html {
 
 .gauge-asteroid-pin {
   position: absolute;
-  left: 32%; /* 0.46 LD / 1.0 LD * 70% */
+  left: 32%;
   top: 50%;
   transform: translate(-50%, -50%);
   width: 12px;
@@ -488,7 +532,7 @@ body, html {
 /* RIGHT CONTROLS PANEL */
 .controls-card {
   pointer-events: auto;
-  width: 210px;
+  width: 220px;
   background: var(--bg-card);
   border: 1px solid var(--border-purple-glow);
   border-radius: 10px;
@@ -496,7 +540,7 @@ body, html {
   backdrop-filter: blur(14px);
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
 }
 
@@ -698,7 +742,6 @@ input[type=range]::-webkit-slider-thumb {
   gap: 18px;
 }
 
-/* TABS */
 .lab-tabs {
   display: flex;
   gap: 8px;

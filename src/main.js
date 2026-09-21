@@ -16,20 +16,32 @@ class PlanetaryDefenseApp {
   }
 
   async init() {
-    // HUD and UI Controllers first
     this.hud = new HudController({
       onSelectNeo: (id) => this.selectNeoById(id),
       onViewChange: (mode) => this.engine.setViewMode(mode),
       onFocusAsteroid: () => this.engine.focusAsteroid(),
       onFocusEarth: () => this.engine.focusEarth(),
+      onFocusBody: (bodyKey) => {
+        if (bodyKey === "asteroid") {
+          this.engine.focusAsteroid();
+        } else if (bodyKey === "earth") {
+          this.engine.focusEarth();
+        } else {
+          // Switch to heliocentric if not already
+          if (this.engine.viewMode !== "heliocentric") {
+            this.engine.setViewMode("heliocentric");
+            this.hud.setActiveViewBtn(this.hud.btnHelio);
+          }
+          this.engine.focusPlanet(bodyKey);
+        }
+      },
       onToggleOrbits: (v) => this.engine.toggleOrbits(v),
       onToggleMoon: (v) => this.engine.toggleMoon(v),
       onToggleSatellites: (v) => this.engine.toggleSatellites(v)
     });
 
-    // Initialize 3D WebGL Scene with 3D label projection
-    this.engine = new SceneEngine(this.container, (positions) => {
-      this.hud.updateLabels(positions);
+    this.engine = new SceneEngine(this.container, (data) => {
+      this.hud.updateLabels(data);
     });
 
     this.timeline = new TimelineController((deltaHours) => {
@@ -55,7 +67,6 @@ class PlanetaryDefenseApp {
       this.loadNeos();
     });
 
-    // Load Near-Earth Objects
     await this.loadNeos();
   }
 
@@ -64,7 +75,6 @@ class PlanetaryDefenseApp {
       this.neoList = await nasaApi.getFeed();
       this.hud.setNeoList(this.neoList);
 
-      // Default to 2026 RZ1 watch
       const defaultObj = this.neoList.find(n => n.id === "2026_rz1") || this.neoList[0];
       if (defaultObj) {
         this.selectNeo(defaultObj);
