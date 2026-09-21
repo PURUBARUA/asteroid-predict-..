@@ -10,16 +10,16 @@ export function createProceduralEarthTexture() {
   canvas.height = 1024;
   const ctx = canvas.getContext("2d");
 
-  // Ocean base gradient (deep navy to royal blue)
+  // Deep oceanic blue gradient
   const oceanGrad = ctx.createLinearGradient(0, 0, 0, canvas.height);
-  oceanGrad.addColorStop(0, "#081b33");
-  oceanGrad.addColorStop(0.5, "#0d2b45");
-  oceanGrad.addColorStop(1, "#081b33");
+  oceanGrad.addColorStop(0, "#061329");
+  oceanGrad.addColorStop(0.5, "#0b254a");
+  oceanGrad.addColorStop(1, "#061329");
   ctx.fillStyle = oceanGrad;
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-  // Procedural continental landmasses
-  ctx.fillStyle = "#2d5a37"; // Forest / continent green
+  // Continental landmasses (natural deep green & earth tones)
+  ctx.fillStyle = "#1e4d2b";
   
   // North America
   ctx.beginPath();
@@ -46,22 +46,22 @@ export function createProceduralEarthTexture() {
   ctx.ellipse(1680, 720, 110, 80, -0.1, 0, Math.PI * 2);
   ctx.fill();
 
-  // Add terrain accents (mountains & deserts)
-  ctx.fillStyle = "#7c6843"; // Ochre / desert
+  // Desert regions
+  ctx.fillStyle = "#6d5b38";
   ctx.beginPath();
   ctx.ellipse(1080, 470, 120, 60, 0, 0, Math.PI * 2); // Sahara
   ctx.fill();
   ctx.beginPath();
-  ctx.ellipse(1450, 360, 160, 70, 0, 0, Math.PI * 2); // Gobi / Central Asia
+  ctx.ellipse(1450, 360, 160, 70, 0, 0, Math.PI * 2); // Gobi
   ctx.fill();
 
   // Polar ice caps
-  ctx.fillStyle = "#ffffff";
-  ctx.fillRect(0, 0, canvas.width, 45); // Arctic
-  ctx.fillRect(0, canvas.height - 55, canvas.width, 55); // Antarctica
+  ctx.fillStyle = "#e2e8f0";
+  ctx.fillRect(0, 0, canvas.width, 45);
+  ctx.fillRect(0, canvas.height - 55, canvas.width, 55);
 
-  // Add grid lines for scientific NASA telemetry look
-  ctx.strokeStyle = "rgba(0, 229, 255, 0.08)";
+  // Scientific latitude & longitude grid lines in subtle blue-violet
+  ctx.strokeStyle = "rgba(99, 102, 241, 0.12)";
   ctx.lineWidth = 1;
   for (let y = 0; y <= canvas.height; y += 128) {
     ctx.beginPath();
@@ -83,37 +83,7 @@ export function createProceduralEarthTexture() {
 }
 
 /**
- * Creates procedural night lights texture
- */
-export function createProceduralNightTexture() {
-  const canvas = document.createElement("canvas");
-  canvas.width = 1024;
-  canvas.height = 512;
-  const ctx = canvas.getContext("2d");
-
-  ctx.fillStyle = "#02040a";
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-  // Golden city light clusters
-  ctx.fillStyle = "#ffcc66";
-  const numClusters = 450;
-  for (let i = 0; i < numClusters; i++) {
-    const x = Math.random() * canvas.width;
-    const y = 80 + Math.random() * (canvas.height - 160);
-    const size = 0.5 + Math.random() * 2;
-    ctx.globalAlpha = 0.3 + Math.random() * 0.7;
-    ctx.beginPath();
-    ctx.arc(x, y, size, 0, Math.PI * 2);
-    ctx.fill();
-  }
-
-  const texture = new THREE.CanvasTexture(canvas);
-  texture.wrapS = THREE.RepeatWrapping;
-  return texture;
-}
-
-/**
- * Atmospheric Fresnel Glow Shader Material (Rayleigh Scattering)
+ * Atmospheric Fresnel Glow Shader (NASA Purple-Blue Rayleigh Scattering)
  */
 export function createAtmosphereMaterial() {
   const vertexShader = `
@@ -131,10 +101,10 @@ export function createAtmosphereMaterial() {
     varying vec3 vPosition;
     void main() {
       vec3 viewDir = normalize(-vPosition);
-      float intensity = pow(1.0 - dot(vNormal, viewDir), 2.8);
-      // NASA cyan-blue atmospheric limb
-      vec3 atmosphereColor = vec3(0.12, 0.58, 0.98);
-      gl_FragColor = vec4(atmosphereColor, intensity * 0.85);
+      float intensity = pow(1.0 - dot(vNormal, viewDir), 2.6);
+      // NASA signature purple-blue atmospheric scattering
+      vec3 atmosphereColor = vec3(0.38, 0.48, 0.98);
+      gl_FragColor = vec4(atmosphereColor, intensity * 0.9);
     }
   `;
 
@@ -149,15 +119,13 @@ export function createAtmosphereMaterial() {
 }
 
 /**
- * Builds the complete Earth entity with atmosphere and cloud shell
- * @param {number} radius - Radius in Three.js units (default 5.0)
- * @returns {THREE.Group}
+ * Builds the complete Earth entity with atmosphere
  */
 export function buildEarth(radius = 5.0) {
   const earthGroup = new THREE.Group();
   earthGroup.name = "EarthSystem";
 
-  // Axial tilt: 23.44 degrees
+  // Earth axial tilt: 23.44 degrees
   earthGroup.rotation.z = (23.44 * Math.PI) / 180;
 
   // Earth Globe
@@ -165,14 +133,14 @@ export function buildEarth(radius = 5.0) {
   const earthGeo = new THREE.SphereGeometry(radius, 64, 64);
   const earthMat = new THREE.MeshStandardMaterial({
     map: dayTexture,
-    roughness: 0.65,
-    metalness: 0.1
+    roughness: 0.7,
+    metalness: 0.15
   });
   const earthMesh = new THREE.Mesh(earthGeo, earthMat);
   earthMesh.name = "EarthMesh";
   earthGroup.add(earthMesh);
 
-  // Atmospheric Halo Shell (slightly larger sphere)
+  // Atmospheric Halo Shell
   const atmosGeo = new THREE.SphereGeometry(radius * 1.15, 64, 64);
   const atmosMat = createAtmosphereMaterial();
   const atmosMesh = new THREE.Mesh(atmosGeo, atmosMat);

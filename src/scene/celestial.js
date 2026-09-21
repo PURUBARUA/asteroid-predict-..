@@ -1,7 +1,7 @@
 import * as THREE from "three";
 
 /**
- * Creates 3D celestial bodies and orbital reference rings:
+ * Creates 3D celestial bodies and orbital reference rings in NASA purple-blue theme:
  * - Moon with 1 Lunar Distance orbit ring (384,400 km)
  * - Geostationary (GEO) satellite ring (35,786 km altitude)
  * - Low Earth Orbit (LEO) ring (400 km altitude - ISS)
@@ -9,23 +9,22 @@ import * as THREE from "three";
  * - Sun directional lighting & solar glare
  */
 
-export function createStarfield(count = 4000, radius = 800) {
+export function createStarfield(count = 4500, radius = 800) {
   const geometry = new THREE.BufferGeometry();
   const positions = new Float32Array(count * 3);
   const colors = new Float32Array(count * 3);
 
   const starColors = [
     new THREE.Color("#ffffff"),
-    new THREE.Color("#b4d7ff"), // O/B blue-white stars
-    new THREE.Color("#fff2cf"), // G yellow stars like Sun
-    new THREE.Color("#ffb499")  // M red giants
+    new THREE.Color("#c084fc"), // Purple-blue stars
+    new THREE.Color("#818cf8"), // Indigo stars
+    new THREE.Color("#93c5fd")  // Blue stars
   ];
 
   for (let i = 0; i < count; i++) {
-    // Distribute uniformly over a sphere
     const theta = Math.random() * Math.PI * 2;
     const phi = Math.acos(2 * Math.random() - 1);
-    const r = radius + (Math.random() - 0.5) * 100;
+    const r = radius + (Math.random() - 0.5) * 120;
 
     positions[i * 3] = r * Math.sin(phi) * Math.cos(theta);
     positions[i * 3 + 1] = r * Math.sin(phi) * Math.sin(theta);
@@ -52,10 +51,7 @@ export function createStarfield(count = 4000, radius = 800) {
   return stars;
 }
 
-/**
- * Creates orbital reference circle line
- */
-export function createOrbitRing(radius, color = "#00e5ff", dashed = false, opacity = 0.4) {
+export function createOrbitRing(radius, color = "#6366f1", dashed = false, opacity = 0.45) {
   const segments = 128;
   const geometry = new THREE.BufferGeometry();
   const points = [];
@@ -88,30 +84,24 @@ export function createOrbitRing(radius, color = "#00e5ff", dashed = false, opaci
   return line;
 }
 
-/**
- * Builds Moon and its orbit ring
- * Earth radius = 5 units.
- * Moon distance: 1 LD = 384,400 km / 6,371 km * 5 units = ~30.17 units (scaled for visualization to 28 units)
- */
 export function buildMoonSystem(moonOrbitRadius = 28.0) {
   const moonGroup = new THREE.Group();
   moonGroup.name = "MoonSystem";
 
-  // Moon orbit ring (1 Lunar Distance reference)
-  const orbitRing = createOrbitRing(moonOrbitRadius, "#64748b", false, 0.4);
+  // Moon orbit ring (1 Lunar Distance reference) in purple-blue
+  const orbitRing = createOrbitRing(moonOrbitRadius, "#818cf8", false, 0.45);
   orbitRing.name = "MoonOrbitRing";
   moonGroup.add(orbitRing);
 
   // Procedural Moon mesh
-  const moonGeo = new THREE.SphereGeometry(1.36, 32, 32); // Moon radius ~ 0.27 Earth radius
+  const moonGeo = new THREE.SphereGeometry(1.36, 32, 32);
   const moonCanvas = document.createElement("canvas");
   moonCanvas.width = 512;
   moonCanvas.height = 256;
   const ctx = moonCanvas.getContext("2d");
-  ctx.fillStyle = "#8c929d"; // Lunar mare
+  ctx.fillStyle = "#8a94a6";
   ctx.fillRect(0, 0, moonCanvas.width, moonCanvas.height);
-  // Add crater spots
-  ctx.fillStyle = "#696f78";
+  ctx.fillStyle = "#697282";
   for (let i = 0; i < 60; i++) {
     ctx.beginPath();
     ctx.arc(Math.random() * 512, Math.random() * 256, 4 + Math.random() * 18, 0, Math.PI * 2);
@@ -140,23 +130,19 @@ export function buildMoonSystem(moonOrbitRadius = 28.0) {
   };
 }
 
-/**
- * Builds Geostationary Orbit (GEO) ring
- * Altitude 35,786 km = ~6.6 Earth Radii -> scaled to ~9.2 units
- */
 export function buildSatelliteRings(earthRadius = 5.0) {
   const group = new THREE.Group();
   group.name = "SatelliteRings";
 
-  // GEO Ring (35,786 km)
+  // GEO Ring (35,786 km) in electric blue
   const geoRadius = earthRadius * 1.84;
-  const geoRing = createOrbitRing(geoRadius, "#00e5ff", true, 0.35);
+  const geoRing = createOrbitRing(geoRadius, "#38bdf8", true, 0.4);
   geoRing.name = "GeoRing";
   group.add(geoRing);
 
-  // LEO Ring (ISS at 400 km)
+  // LEO Ring (ISS at 400 km) in vibrant violet
   const leoRadius = earthRadius * 1.12;
-  const leoRing = createOrbitRing(leoRadius, "#34d399", false, 0.3);
+  const leoRing = createOrbitRing(leoRadius, "#a855f7", false, 0.35);
   leoRing.name = "LeoRing";
   group.add(leoRing);
 

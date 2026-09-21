@@ -5,34 +5,53 @@ export class HudController {
   constructor(callbacks = {}) {
     this.callbacks = callbacks;
     this.currentNeo = null;
-    this.unitSystem = "metric"; // "metric", "imperial", "astronomical"
+    this.neoList = [];
+    this.currentIndex = 0;
+    this.unitSystem = "metric";
+
     this.initDOM();
     this.startClock();
   }
 
   initDOM() {
-    // Buttons and inputs
-    this.targetSelect = document.getElementById("neo-target-select");
+    // Navigation & Buttons
+    this.searchInput = document.getElementById("header-search-input");
+    this.btnPrev = document.getElementById("btn-prev-neo");
+    this.btnNext = document.getElementById("btn-next-neo");
     this.btnGeo = document.getElementById("btn-view-geo");
     this.btnHelio = document.getElementById("btn-view-helio");
     this.btnFocusAsteroid = document.getElementById("btn-focus-asteroid");
     this.btnFocusEarth = document.getElementById("btn-focus-earth");
     this.btnSound = document.getElementById("btn-sound-toggle");
 
-    // Telemetry fields
+    // Telemetry fields (NASA 4-grid metrics)
     this.clockUTC = document.getElementById("hud-utc-clock");
     this.clockJD = document.getElementById("hud-jd-clock");
-    this.targetName = document.getElementById("hud-target-name");
-    this.targetType = document.getElementById("hud-target-type");
-    this.targetDiameter = document.getElementById("hud-target-diameter");
-    this.targetComparison = document.getElementById("hud-target-comparison");
-    this.targetDistance = document.getElementById("hud-target-distance");
-    this.targetVelocity = document.getElementById("hud-target-velocity");
-    this.targetPhaBadge = document.getElementById("hud-pha-badge");
-    this.targetEnergy = document.getElementById("hud-target-energy");
-    this.targetNarrative = document.getElementById("hud-target-narrative");
+    this.targetTitle = document.getElementById("hud-target-title");
+    this.targetSubtitle = document.getElementById("hud-target-subtitle");
+    
+    this.metricNextPass = document.getElementById("metric-next-pass");
+    this.metricNextPassSub = document.getElementById("metric-next-pass-sub");
+    
+    this.metricDistance = document.getElementById("metric-distance");
+    this.metricDistanceSub = document.getElementById("metric-distance-sub");
+    
+    this.metricSpeed = document.getElementById("metric-speed");
+    this.metricSpeedSub = document.getElementById("metric-speed-sub");
+    
+    this.metricSize = document.getElementById("metric-size");
+    this.metricSizeSub = document.getElementById("metric-size-sub");
 
-    // Layers
+    this.gaugePin = document.getElementById("gauge-asteroid-pin");
+    this.narrativeBrief = document.getElementById("hud-narrative-brief");
+
+    // Floating 3D Labels
+    this.labelEarth = document.getElementById("label-earth");
+    this.labelAsteroid = document.getElementById("label-asteroid");
+    this.labelAsteroidText = document.getElementById("label-asteroid-text");
+    this.labelMoon = document.getElementById("label-moon");
+
+    // Layer checkboxes
     this.toggleOrbits = document.getElementById("toggle-orbits");
     this.toggleMoon = document.getElementById("toggle-moon");
     this.toggleSatellites = document.getElementById("toggle-satellites");
@@ -41,12 +60,34 @@ export class HudController {
   }
 
   bindEvents() {
-    if (this.targetSelect) {
-      this.targetSelect.addEventListener("change", (e) => {
-        soundFX.playRadarPing();
-        if (this.callbacks.onSelectNeo) {
-          this.callbacks.onSelectNeo(e.target.value);
+    // Search bar live filtering
+    if (this.searchInput) {
+      this.searchInput.addEventListener("input", (e) => {
+        const query = e.target.value.toLowerCase().trim();
+        if (!query) return;
+        const found = this.neoList.find(n => 
+          n.name.toLowerCase().includes(query) || 
+          n.full_name?.toLowerCase().includes(query) ||
+          n.id.toLowerCase().includes(query)
+        );
+        if (found) {
+          this.setNeo(found);
+          if (this.callbacks.onSelectNeo) this.callbacks.onSelectNeo(found.id);
         }
+      });
+    }
+
+    // Carousel navigation
+    if (this.btnPrev) {
+      this.btnPrev.addEventListener("click", () => {
+        soundFX.playTelemetryClick();
+        this.stepCarousel(-1);
+      });
+    }
+    if (this.btnNext) {
+      this.btnNext.addEventListener("click", () => {
+        soundFX.playTelemetryClick();
+        this.stepCarousel(1);
       });
     }
 
@@ -128,86 +169,137 @@ export class HudController {
     if (activeBtn) activeBtn.classList.add("active");
   }
 
-  populateNeoDropdown(neoList) {
-    if (!this.targetSelect) return;
-    this.targetSelect.innerHTML = "";
+  setNeoList(list) {
+    this.neoList = list || [];
+  }
 
-    neoList.forEach(neo => {
-      const opt = document.createElement("option");
-      opt.value = neo.id;
-      const isWatch = neo.id === "2026_rz1" ? "★ [WATCH] " : "";
-      const missLD = neo.miss_distance_ld ? ` (${neo.miss_distance_ld} LD)` : "";
-      opt.textContent = `${isWatch}${neo.name}${missLD}`;
-      if (neo.id === "2026_rz1") opt.selected = true;
-      this.targetSelect.appendChild(opt);
-    });
+  stepCarousel(direction) {
+    if (this.neoList.length === 0) return;
+    this.currentIndex = (this.currentIndex + direction + this.neoList.length) % this.neoList.length;
+    const nextNeo = this.neoList[this.currentIndex];
+    this.setNeo(nextNeo);
+    if (this.callbacks.onSelectNeo) this.callbacks.onSelectNeo(nextNeo.id);
   }
 
   setNeo(neo) {
     this.currentNeo = neo;
-    if (this.targetName) this.targetName.textContent = neo.name || "Unknown";
-    if (this.targetType) this.targetType.textContent = `${neo.orbit_class || "Apollo"} Class Orbit`;
+    this.currentIndex = this.neoList.findIndex(n => n.id === neo.id);
+    if (this.currentIndex === -1) this.currentIndex = 0;
 
+    if (this.targetTitle) this.targetTitle.textContent = neo.name || "Unknown";
+    if (this.targetSubtitle) {
+      const phaText = neo.is_potentially_hazardous ? "Potentially Hazardous Asteroid • " : "";
+      this.targetSubtitle.textContent = `${phaText}${neo.orbit_class || "Apollo"} Class`;
+    }
+
+    if (this.labelAsteroidText) {
+      this.labelAsteroidText.textContent = neo.name;
+    }
+
+    // Size Metric
     const avgDiam = Math.round(((neo.estimated_diameter_min_m || 30) + (neo.estimated_diameter_max_m || 60)) / 2);
-    if (this.targetDiameter) {
-      this.targetDiameter.textContent = `${avgDiam} meters (${(avgDiam * 3.28084).toFixed(0)} ft)`;
+    if (this.metricSize) {
+      this.metricSize.textContent = `~${avgDiam} m`;
+    }
+    if (this.metricSizeSub) {
+      this.metricSizeSub.textContent = this.getSizeComparisonText(avgDiam);
     }
 
-    if (this.targetComparison) {
-      this.targetComparison.textContent = this.getSizeComparisonText(avgDiam);
+    // Next Pass Metric
+    if (this.metricNextPass) {
+      this.metricNextPass.textContent = neo.close_approach_date?.split(" ")[0] || "Sep 12, 2026";
+    }
+    if (this.metricNextPassSub) {
+      this.metricNextPassSub.textContent = "Closest Encounter Watch";
     }
 
-    if (this.targetPhaBadge) {
-      if (neo.is_potentially_hazardous) {
-        this.targetPhaBadge.textContent = "POTENTIALLY HAZARDOUS (PHA)";
-        this.targetPhaBadge.className = "badge badge-pha";
-      } else {
-        this.targetPhaBadge.textContent = "NON-HAZARDOUS";
-        this.targetPhaBadge.className = "badge badge-safe";
-      }
-    }
-
-    if (this.targetNarrative && neo.narrative) {
-      this.targetNarrative.textContent = neo.narrative;
+    // Narrative
+    if (this.narrativeBrief && neo.narrative) {
+      this.narrativeBrief.textContent = neo.narrative;
     }
 
     this.updateTelemetry(0);
   }
 
   getSizeComparisonText(diameterM) {
-    if (diameterM < 25) return "Size: ~School Bus (Chelyabinsk class)";
-    if (diameterM < 80) return "Size: ~15-Story Building / Boeing 777";
-    if (diameterM < 180) return "Size: ~Football Stadium (Dimorphos class)";
-    if (diameterM < 400) return "Size: ~Eiffel Tower / Cruise Ship (Apophis class)";
-    if (diameterM < 800) return "Size: ~Burj Khalifa / Skyscraper (Bennu class)";
-    return "Size: Multi-Kilometer Planetary Impactor";
+    if (diameterM < 25) return "~Bus Size (Chelyabinsk)";
+    if (diameterM < 80) return "~Boeing 777 / 15-Story Bldg";
+    if (diameterM < 180) return "~Football Stadium (DART)";
+    if (diameterM < 400) return "~Eiffel Tower (Apophis)";
+    return "~Skyscraper / Mountain";
   }
 
   updateTelemetry(deltaHours) {
     this.lastDeltaHours = deltaHours;
     if (!this.currentNeo) return;
 
-    // Calculate instantaneous geocentric flyby position and distance
     const flyby = propagateGeocentricFlyby(this.currentNeo, deltaHours);
     const distKm = flyby.distKm;
     const distLD = distKm / LUNAR_DISTANCE_KM;
     const velKms = this.currentNeo.relative_velocity_kms || 14.8;
 
-    if (this.targetDistance) {
+    // Distance Metric
+    if (this.metricDistance) {
       if (this.unitSystem === "astronomical") {
-        this.targetDistance.textContent = `${distLD.toFixed(3)} LD (${(distKm / 149597870.7).toFixed(5)} AU)`;
+        this.metricDistance.textContent = `${distLD.toFixed(3)} LD`;
       } else if (this.unitSystem === "imperial") {
-        this.targetDistance.textContent = `${(distKm * 0.621371).toLocaleString(undefined, { maximumFractionDigits: 0 })} miles (${distLD.toFixed(2)} Lunar Dist.)`;
+        this.metricDistance.textContent = `${(distKm * 0.621371).toLocaleString(undefined, { maximumFractionDigits: 0 })} mi`;
       } else {
-        this.targetDistance.textContent = `${distKm.toLocaleString(undefined, { maximumFractionDigits: 0 })} km (${distLD.toFixed(2)} LD)`;
+        this.metricDistance.textContent = `${distKm.toLocaleString(undefined, { maximumFractionDigits: 0 })} km`;
+      }
+    }
+    if (this.metricDistanceSub) {
+      this.metricDistanceSub.textContent = `${distLD.toFixed(2)} Lunar Distances (${distLD < 1.0 ? "Closer than Moon!" : "Outside Moon orbit"})`;
+    }
+
+    // Speed Metric
+    if (this.metricSpeed) {
+      if (this.unitSystem === "imperial") {
+        this.metricSpeed.textContent = `${(velKms * 2236.94).toLocaleString(undefined, { maximumFractionDigits: 0 })} mph`;
+      } else {
+        this.metricSpeed.textContent = `${velKms.toFixed(2)} km/s`;
+      }
+    }
+    if (this.metricSpeedSub) {
+      this.metricSpeedSub.textContent = `${(velKms * 3600).toLocaleString(undefined, { maximumFractionDigits: 0 })} km/h relative to Earth`;
+    }
+
+    // Update Lunar Distance graphical gauge pin
+    if (this.gaugePin) {
+      // 0 LD = 0%, 1.0 LD = 70% (Moon marker)
+      const pct = Math.max(3, Math.min(97, (distLD / 1.0) * 70));
+      this.gaugePin.style.left = `${pct}%`;
+    }
+  }
+
+  updateLabels(positions) {
+    if (positions.earth && this.labelEarth) {
+      if (positions.earth.visible) {
+        this.labelEarth.style.left = `${positions.earth.x}px`;
+        this.labelEarth.style.top = `${positions.earth.y - 12}px`;
+        this.labelEarth.classList.add("visible");
+      } else {
+        this.labelEarth.classList.remove("visible");
       }
     }
 
-    if (this.targetVelocity) {
-      if (this.unitSystem === "imperial") {
-        this.targetVelocity.textContent = `${(velKms * 2236.94).toLocaleString(undefined, { maximumFractionDigits: 0 })} mph`;
+    if (positions.asteroid && this.labelAsteroid) {
+      if (positions.asteroid.visible) {
+        this.labelAsteroid.style.left = `${positions.asteroid.x}px`;
+        this.labelAsteroid.style.top = `${positions.asteroid.y - 12}px`;
+        this.labelAsteroid.classList.add("visible");
       } else {
-        this.targetVelocity.textContent = `${velKms.toFixed(2)} km/s (${(velKms * 3600).toLocaleString(undefined, { maximumFractionDigits: 0 })} km/h)`;
+        this.labelAsteroid.classList.remove("visible");
+      }
+    }
+
+    if (positions.moon && this.labelMoon) {
+      if (positions.moon.visible) {
+        this.labelMoon.style.left = `${positions.moon.x}px`;
+        this.labelMoon.style.top = `${positions.moon.y - 10}px`;
+        this.labelMoon.classList.add("visible");
+      } else {
+        this.labelMoon.classList.remove("visible");
       }
     }
   }
@@ -219,7 +311,6 @@ export class HudController {
         this.clockUTC.textContent = now.toISOString().replace("T", " ").substring(0, 19) + " UTC";
       }
       if (this.clockJD) {
-        // Julian Date formula
         const time = now.getTime();
         const jd = (time / 86400000.0) + 2440587.5;
         this.clockJD.textContent = `JD ${jd.toFixed(4)}`;

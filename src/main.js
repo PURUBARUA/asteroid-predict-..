@@ -16,10 +16,7 @@ class PlanetaryDefenseApp {
   }
 
   async init() {
-    // Initialize 3D WebGL Scene
-    this.engine = new SceneEngine(this.container);
-
-    // Initialize HUD and UI Controllers
+    // HUD and UI Controllers first
     this.hud = new HudController({
       onSelectNeo: (id) => this.selectNeoById(id),
       onViewChange: (mode) => this.engine.setViewMode(mode),
@@ -30,13 +27,17 @@ class PlanetaryDefenseApp {
       onToggleSatellites: (v) => this.engine.toggleSatellites(v)
     });
 
+    // Initialize 3D WebGL Scene with 3D label projection
+    this.engine = new SceneEngine(this.container, (positions) => {
+      this.hud.updateLabels(positions);
+    });
+
     this.timeline = new TimelineController((deltaHours) => {
       this.engine.updateAsteroidPosition(deltaHours);
       this.hud.updateTelemetry(deltaHours);
     });
 
     this.studentLab = new StudentLabController((customElements) => {
-      // If student adjusts Keplerian elements in the lab:
       if (this.activeNeo) {
         const modified = {
           ...this.activeNeo,
@@ -61,9 +62,9 @@ class PlanetaryDefenseApp {
   async loadNeos() {
     try {
       this.neoList = await nasaApi.getFeed();
-      this.hud.populateNeoDropdown(this.neoList);
+      this.hud.setNeoList(this.neoList);
 
-      // Default to 2026 RZ1 (or first featured object)
+      // Default to 2026 RZ1 watch
       const defaultObj = this.neoList.find(n => n.id === "2026_rz1") || this.neoList[0];
       if (defaultObj) {
         this.selectNeo(defaultObj);
@@ -83,11 +84,10 @@ class PlanetaryDefenseApp {
     this.engine.setTargetNeo(neo);
     this.hud.setNeo(neo);
     this.mlModal.setNeo(neo);
-    this.timeline.setTime(0); // reset to closest approach encounter
+    this.timeline.setTime(0);
   }
 }
 
-// Bootstrap application on DOM ready
 window.addEventListener("DOMContentLoaded", () => {
   new PlanetaryDefenseApp();
 });

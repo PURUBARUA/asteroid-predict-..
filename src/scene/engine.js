@@ -3,14 +3,15 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { buildEarth } from "./earth.js";
 import { createStarfield, buildMoonSystem, buildSatelliteRings, createOrbitRing } from "./celestial.js";
 import { createAsteroidMesh, createTrajectoryLine, createPerigeeVector } from "./asteroidModel.js";
-import { propagateGeocentricFlyby, generateOrbitPath, propagateKeplerian, LUNAR_DISTANCE_KM } from "../physics/kepler.js";
+import { propagateGeocentricFlyby, generateOrbitPath, propagateKeplerian } from "../physics/kepler.js";
 
 export class SceneEngine {
-  constructor(canvasContainer) {
+  constructor(canvasContainer, onLabelUpdate) {
     this.container = canvasContainer;
+    this.onLabelUpdate = onLabelUpdate;
     this.viewMode = "geocentric"; // "geocentric" or "heliocentric"
     this.currentNeo = null;
-    this.deltaHours = 0; // Relative to closest approach (t=0)
+    this.deltaHours = 0;
     this.orbitRingVisible = true;
     this.satellitesVisible = true;
     this.moonVisible = true;
@@ -24,12 +25,12 @@ export class SceneEngine {
 
   initThree() {
     this.scene = new THREE.Scene();
-    this.scene.background = new THREE.Color("#02040a"); // Deep space black
+    this.scene.background = new THREE.Color("#030511"); // Deep cosmic navy/black
 
     const width = this.container.clientWidth || window.innerWidth;
     const height = this.container.clientHeight || window.innerHeight;
 
-    this.camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 3000);
+    this.camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 4000);
     this.camera.position.set(0, 22, 50);
 
     this.renderer = new THREE.WebGLRenderer({
@@ -39,23 +40,23 @@ export class SceneEngine {
     this.renderer.setSize(width, height);
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    this.renderer.toneMappingExposure = 1.1;
+    this.renderer.toneMappingExposure = 1.15;
 
     this.container.appendChild(this.renderer.domElement);
   }
 
   initSceneObjects() {
-    // Starfield
-    this.starfield = createStarfield(4500, 900);
+    // Purple-blue starry space
+    this.starfield = createStarfield(4500, 950);
     this.scene.add(this.starfield);
 
     // Directional Sunlight
-    this.sunLight = new THREE.DirectionalLight(0xffffff, 2.2);
-    this.sunLight.position.set(60, 20, 80);
+    this.sunLight = new THREE.DirectionalLight(0xffffff, 2.3);
+    this.sunLight.position.set(70, 25, 90);
     this.scene.add(this.sunLight);
 
-    // Ambient space light
-    this.ambientLight = new THREE.AmbientLight(0x2a3b5c, 0.45);
+    // Ambient space light with cosmic blue tint
+    this.ambientLight = new THREE.AmbientLight(0x312e81, 0.4);
     this.scene.add(this.ambientLight);
 
     // Earth System
@@ -63,7 +64,7 @@ export class SceneEngine {
     this.earth = buildEarth(this.earthRadius);
     this.scene.add(this.earth);
 
-    // Moon System (1 Lunar Distance ~ 28 units visual)
+    // Moon System (1 Lunar Distance = 28 units)
     this.moonSystem = buildMoonSystem(28.0);
     this.scene.add(this.moonSystem.group);
 
@@ -92,7 +93,7 @@ export class SceneEngine {
     this.controls.enableDamping = true;
     this.controls.dampingFactor = 0.05;
     this.controls.minDistance = 6.0;
-    this.controls.maxDistance = 600.0;
+    this.controls.maxDistance = 650.0;
     this.controls.maxPolarAngle = Math.PI - 0.05;
   }
 
@@ -119,10 +120,9 @@ export class SceneEngine {
       this.moonSystem.group.visible = this.moonVisible;
       this.satelliteRings.visible = this.satellitesVisible;
       this.heliocenterSun.visible = false;
-      this.camera.position.set(0, 25, 48);
+      this.camera.position.set(0, 24, 48);
       this.controls.target.set(0, 0, 0);
     } else {
-      // Heliocentric Solar System Mode
       this.earth.visible = true;
       this.moonSystem.group.visible = false;
       this.satelliteRings.visible = false;
@@ -135,7 +135,6 @@ export class SceneEngine {
   }
 
   rebuildTrajectory() {
-    // Clear old trajectory lines
     while (this.trajectoryGroup.children.length > 0) {
       const obj = this.trajectoryGroup.children[0];
       if (obj.geometry) obj.geometry.dispose();
@@ -145,45 +144,40 @@ export class SceneEngine {
     if (!this.currentNeo) return;
 
     if (this.viewMode === "geocentric") {
-      // Build flyby arc relative to Earth
       const points = [];
       const numSteps = 120;
-      const spanHours = 48; // -24h to +24h
+      const spanHours = 48;
       for (let i = 0; i <= numSteps; i++) {
         const tHours = -spanHours / 2 + (i / numSteps) * spanHours;
         const pos = propagateGeocentricFlyby(this.currentNeo, tHours);
-        // Scale km to Three.js world units: Earth radius (6,371 km) = 5 units
         const scale = 5.0 / 6371.0;
-        // Limit visual bounds for hyperbolic asymptote
         points.push(new THREE.Vector3(pos.x * scale, pos.y * scale, pos.z * scale));
       }
 
-      const trajectoryLine = createTrajectoryLine(points, 0x00e5ff);
+      // Purple to Electric Blue gradient trajectory line
+      const trajectoryLine = createTrajectoryLine(points, 0x8b5cf6, 0x38bdf8);
       this.trajectoryGroup.add(trajectoryLine);
 
-      // Add closest approach perigee vector
+      // Perigee vector in magenta-rose
       const closest = propagateGeocentricFlyby(this.currentNeo, 0);
       const scale = 5.0 / 6371.0;
       const perigeeLine = createPerigeeVector({
         x: closest.x * scale,
         y: closest.y * scale,
         z: closest.z * scale
-      }, 0xff3b30);
+      }, 0xf43f5e);
       this.trajectoryGroup.add(perigeeLine);
 
     } else {
-      // Heliocentric orbit path
       const elements = this.currentNeo.orbital_elements;
       if (elements) {
         const orbitPoints = generateOrbitPath(elements, 200);
-        // Scale 1 AU = 60 Three.js units
         const auScale = 60.0;
         const scaledPts = orbitPoints.map(p => new THREE.Vector3(p.x * auScale, p.z * auScale, p.y * auScale));
-        const orbitLine = createTrajectoryLine(scaledPts, 0xff9900);
+        const orbitLine = createTrajectoryLine(scaledPts, 0x8b5cf6, 0x3b82f6);
         this.trajectoryGroup.add(orbitLine);
 
-        // Earth orbit line (1 AU circle)
-        const earthOrbit = createOrbitRing(60.0, "#00e5ff", false, 0.35);
+        const earthOrbit = createOrbitRing(60.0, "#38bdf8", false, 0.4);
         this.trajectoryGroup.add(earthOrbit);
       }
     }
@@ -199,7 +193,6 @@ export class SceneEngine {
       this.asteroidMesh.position.set(pos.x * scale, pos.y * scale, pos.z * scale);
       this.earth.position.set(0, 0, 0);
     } else {
-      // Heliocentric positioning
       const deltaDays = deltaHours / 24.0;
       const elements = this.currentNeo.orbital_elements;
       if (elements) {
@@ -207,7 +200,6 @@ export class SceneEngine {
         const auScale = 60.0;
         this.asteroidMesh.position.set(astPos.x * auScale, astPos.z * auScale, astPos.y * auScale);
 
-        // Earth circular position for heliocentric reference
         const earthAngle = (deltaDays / 365.25) * 2 * Math.PI;
         this.earth.position.set(Math.cos(earthAngle) * auScale, 0, Math.sin(earthAngle) * auScale);
       }
@@ -231,27 +223,44 @@ export class SceneEngine {
 
   focusAsteroid() {
     const pos = this.asteroidMesh.position;
-    this.camera.position.set(pos.x + 3, pos.y + 2, pos.z + 4);
+    this.camera.position.set(pos.x + 3.5, pos.y + 2.2, pos.z + 4.5);
     this.controls.target.copy(pos);
     this.controls.update();
   }
 
   focusEarth() {
-    this.camera.position.set(0, 22, 48);
+    this.camera.position.set(0, 24, 48);
     this.controls.target.set(0, 0, 0);
     this.controls.update();
+  }
+
+  toScreenPosition(obj3D) {
+    const vector = new THREE.Vector3();
+    const widthHalf = 0.5 * this.renderer.domElement.clientWidth;
+    const heightHalf = 0.5 * this.renderer.domElement.clientHeight;
+
+    obj3D.updateMatrixWorld();
+    vector.setFromMatrixPosition(obj3D.matrixWorld);
+    
+    // Check if behind camera
+    const behind = vector.clone().applyMatrix4(this.camera.matrixWorldInverse).z > 0;
+    vector.project(this.camera);
+
+    return {
+      x: (vector.x * widthHalf) + widthHalf,
+      y: -(vector.y * heightHalf) + heightHalf,
+      visible: !behind && vector.z < 1.0
+    };
   }
 
   animate() {
     requestAnimationFrame(() => this.animate());
 
-    // Earth axial spin
     if (this.earth) {
       const mesh = this.earth.getObjectByName("EarthMesh");
-      if (mesh) mesh.rotation.y += 0.001;
+      if (mesh) mesh.rotation.y += 0.0012;
     }
 
-    // Asteroid tumbling rotation
     if (this.asteroidMesh) {
       this.asteroidMesh.rotation.x += 0.008;
       this.asteroidMesh.rotation.y += 0.012;
@@ -259,7 +268,6 @@ export class SceneEngine {
       if (reticle) reticle.lookAt(this.camera.position);
     }
 
-    // Moon revolution
     if (this.moonSystem) {
       const angle = (Date.now() * 0.0001) % (Math.PI * 2);
       this.moonSystem.update(angle);
@@ -267,5 +275,17 @@ export class SceneEngine {
 
     this.controls.update();
     this.renderer.render(this.scene, this.camera);
+
+    // Update 3D projected screen labels
+    if (this.onLabelUpdate) {
+      const earthScr = this.toScreenPosition(this.earth);
+      const astScr = this.toScreenPosition(this.asteroidMesh);
+      const moonScr = this.moonSystem?.mesh ? this.toScreenPosition(this.moonSystem.mesh) : null;
+      this.onLabelUpdate({
+        earth: earthScr,
+        asteroid: astScr,
+        moon: moonScr
+      });
+    }
   }
 }

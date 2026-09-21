@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>NASA Eyes on Asteroids | 2026 RZ1 Watch & Planetary Defense Lab</title>
-  <meta name="description" content="Interactive 3D NASA Eyes on Asteroids replica, close approach watch for 2026 RZ1, Keplerian orbital mechanics lab, and machine learning impact hazard classifier.">
+  <title>NASA Eyes on Asteroids | 2026 RZ1 Watch &amp; Planetary Defense</title>
+  <meta name="description" content="Interactive 3D NASA Eyes on Asteroids simulation, close approach watch for 2026 RZ1, zoomable Earth, Keplerian orbital mechanics lab, and machine learning impact hazard predictor.">
   <link rel="stylesheet" href="./src/styles/main.css">
   <link rel="icon" type="image/svg+xml" href="./favicon.svg">
 </head>
@@ -13,24 +13,61 @@
   <!-- WebGL 3D Canvas Viewport -->
   <div id="canvas-container"></div>
 
-  <!-- HUD Mission Control Interface Overlay -->
+  <!-- Dynamic 3D Projected Screen Labels -->
+  <div id="label-earth" class="floating-3d-label">
+    <div class="label-content">
+      <span class="label-dot"></span> Earth
+    </div>
+    <div class="label-pointer"></div>
+  </div>
+
+  <div id="label-asteroid" class="floating-3d-label">
+    <div class="label-content">
+      <span class="label-dot asteroid"></span> <span id="label-asteroid-text">2026 RZ1</span>
+    </div>
+    <div class="label-pointer"></div>
+  </div>
+
+  <div id="label-moon" class="floating-3d-label">
+    <div class="label-content">
+      <span class="label-dot" style="background: #94a3b8; box-shadow: none;"></span> Moon (1 LD)
+    </div>
+    <div class="label-pointer"></div>
+  </div>
+
+  <!-- HUD Master Overlay -->
   <div class="hud-overlay">
 
-    <!-- Top Mission Header -->
+    <!-- Top Header (Official NASA Eyes on Asteroids Style) -->
     <header class="hud-header">
       <div class="brand-section">
-        <div class="radar-logo"></div>
-        <div>
-          <div class="brand-title">NASA // EYES ON ASTEROIDS</div>
-          <div class="brand-sub">PLANETARY DEFENSE COORDINATION &amp; ORBITAL DYNAMICS LAB</div>
+        <div class="nasa-meatball" title="NASA Jet Propulsion Laboratory">
+          <div class="nasa-meatball-orbit"></div>
+          <span class="nasa-meatball-text">NASA</span>
+        </div>
+
+        <div class="brand-titles">
+          <div class="brand-title-wrap">
+            <span class="brand-title">Eyes on Asteroids</span>
+            <span class="badge-watch-mode">ASTEROID WATCH</span>
+          </div>
+          <span class="brand-sub">Center for Near-Earth Object Studies &bull; JPL Caltech</span>
         </div>
       </div>
 
-      <div class="clock-section">
-        <div id="hud-utc-clock">2026-09-21 00:00:00 UTC</div>
-        <div id="hud-jd-clock" class="clock-jd">JD 2461296.0000</div>
+      <!-- Live Search Bar -->
+      <div class="header-search-wrap">
+        <svg class="search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" id="header-search-input" class="header-search-input" placeholder="Search 2026 RZ1, Apophis, Bennu..." title="Search Asteroid Database">
       </div>
 
+      <!-- Live Telemetry Clocks -->
+      <div class="clock-section" style="display: flex; flex-direction: column; align-items: center;">
+        <div id="hud-utc-clock" style="font-family: var(--font-mono); font-size: 12px; color: var(--color-purple-light); font-weight: 600;">2026-09-21 00:00:00 UTC</div>
+        <div id="hud-jd-clock" class="clock-jd" style="font-family: var(--font-mono); font-size: 10px; color: var(--text-secondary);">JD 2461296.0000</div>
+      </div>
+
+      <!-- Action Navigation Buttons -->
       <div class="nav-actions">
         <button id="btn-open-student-lab" class="hud-btn" title="Open Interactive Student Orbital Mechanics Laboratory">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
@@ -42,7 +79,7 @@
         </button>
         <button id="btn-open-compliance" class="hud-btn" title="View NASA Open Data Attribution &amp; Aerospace Portfolio">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
-          DATA &amp; BIO
+          NASA DATA &amp; BIO
         </button>
         <button id="btn-sound-toggle" class="hud-btn" title="Toggle Audio FX">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
@@ -50,47 +87,77 @@
       </div>
     </header>
 
-    <!-- Side Floating HUD Cards -->
+    <!-- Center HUD (Asteroid Watch Card + View Controls) -->
     <main class="hud-middle">
-      <!-- Left Telemetry Card -->
-      <section class="telemetry-card">
-        <div class="card-header">
-          <div class="target-select-wrapper">
-            <select id="neo-target-select" class="styled-select" title="Select Asteroid Target">
-              <option value="2026_rz1">★ [WATCH] Asteroid 2026 RZ1 (0.46 LD)</option>
-            </select>
+
+      <!-- Official NASA Asteroid Watch Card -->
+      <section class="asteroid-watch-card">
+        <div class="watch-card-header">
+          <div>
+            <h1 id="hud-target-title" class="object-main-title">2026 RZ1</h1>
+            <div id="hud-target-subtitle" class="object-subtitle">Potentially Hazardous Asteroid &bull; Apollo Class</div>
           </div>
-          <h1 id="hud-target-name" class="target-title">2026 RZ1</h1>
-          <div id="hud-target-type" class="target-type">Apollo Class Orbit</div>
-          <div id="hud-pha-badge" class="badge badge-pha">POTENTIALLY HAZARDOUS (PHA)</div>
+          <!-- Carousel Prev / Next Switcher -->
+          <div class="carousel-nav-group">
+            <button id="btn-prev-neo" class="carousel-btn" title="Previous Close-Approach Asteroid">&#9664;</button>
+            <button id="btn-next-neo" class="carousel-btn" title="Next Close-Approach Asteroid">&#9654;</button>
+          </div>
         </div>
 
-        <div class="telemetry-body">
-          <div class="telemetry-row">
-            <span class="telemetry-label">EST. DIAMETER</span>
-            <span id="hud-target-diameter" class="telemetry-val">52 meters (170 ft)</span>
-          </div>
-          <span id="hud-target-comparison" class="comparison-tag">Size: ~15-Story Building / Boeing 777</span>
-
-          <div class="telemetry-row" style="margin-top: 12px;">
-            <span class="telemetry-label">MISS DISTANCE</span>
-            <span id="hud-target-distance" class="telemetry-val">176,800 km (0.46 LD)</span>
+        <!-- 4 Essential NASA Watch Metrics -->
+        <div class="metrics-4grid">
+          <!-- Metric 1: Next Pass -->
+          <div class="metric-box">
+            <span class="metric-label">NEXT PASS</span>
+            <span id="metric-next-pass" class="metric-value">Sep 12, 2026</span>
+            <span id="metric-next-pass-sub" class="metric-sub">Closest Encounter Watch</span>
           </div>
 
-          <div class="telemetry-row">
-            <span class="telemetry-label">REL. VELOCITY</span>
-            <span id="hud-target-velocity" class="telemetry-val">14.78 km/s (33,062 mph)</span>
+          <!-- Metric 2: Distance -->
+          <div class="metric-box">
+            <span class="metric-label">DISTANCE</span>
+            <span id="metric-distance" class="metric-value">176,800 km</span>
+            <span id="metric-distance-sub" class="metric-sub">0.46 LD (Closer than Moon)</span>
           </div>
 
-          <div id="hud-target-narrative" class="narrative-box">
-            Discovered during automated deep-sky planetary defense surveys, 2026 RZ1 makes an exceptionally close, photogenic encounter with Earth on September 12, 2026, passing well inside the Moon's orbit at 0.46 Lunar Distances.
+          <!-- Metric 3: Speed -->
+          <div class="metric-box">
+            <span class="metric-label">SPEED</span>
+            <span id="metric-speed" class="metric-value">14.78 km/s</span>
+            <span id="metric-speed-sub" class="metric-sub">33,062 mph relative to Earth</span>
           </div>
+
+          <!-- Metric 4: Size -->
+          <div class="metric-box">
+            <span class="metric-label">EST. SIZE</span>
+            <span id="metric-size" class="metric-value">~52 meters</span>
+            <span id="metric-size-sub" class="metric-sub">~15-Story Bldg / Boeing 777</span>
+          </div>
+        </div>
+
+        <!-- Signature NASA Lunar Distance Visual Gauge Bar -->
+        <div class="lunar-distance-gauge">
+          <div class="gauge-header">
+            <span>EARTH ENCOUNTER PROXIMITY GAUGE</span>
+            <span style="color: var(--color-purple-light);">0.46 LUNAR DISTANCES</span>
+          </div>
+          <div class="gauge-track-container">
+            <div class="gauge-moon-marker"></div>
+            <div class="gauge-earth-label">Earth (0 LD)</div>
+            <div class="gauge-moon-label">Moon (1.0 LD)</div>
+            <div id="gauge-asteroid-pin" class="gauge-asteroid-pin" title="Asteroid Distance Position"></div>
+          </div>
+        </div>
+
+        <!-- Narrative brief -->
+        <div id="hud-narrative-brief" class="narrative-brief">
+          Discovered during automated deep-sky planetary defense surveys, 2026 RZ1 makes an exceptionally close, photogenic encounter with Earth on September 12, 2026, passing well inside the Moon's orbit at 0.46 Lunar Distances (176,800 km). Highly monitored by NASA Goldstone Deep Space Communications Complex.
         </div>
       </section>
 
       <!-- Right View & Layer Controls -->
       <aside class="controls-card">
-        <div class="panel-subhead">CAMERA VIEW</div>
+        <div class="panel-subhead">VIEW MODE</div>
         <div class="view-btn-group">
           <button id="btn-view-geo" class="hud-btn active">GEOCENTRIC (ENCOUNTER)</button>
           <button id="btn-view-helio" class="hud-btn">HELIOCENTRIC (SOLAR SYSTEM)</button>
@@ -102,14 +169,14 @@
         <div class="unit-switcher">
           <button id="unit-metric" class="unit-btn active" data-unit="metric">METRIC</button>
           <button id="unit-imperial" class="unit-btn" data-unit="imperial">IMPERIAL</button>
-          <button id="unit-astro" class="unit-btn" data-unit="astronomical">ASTRONOMICAL</button>
+          <button id="unit-astro" class="unit-btn" data-unit="astronomical">ASTRO</button>
         </div>
 
         <div class="panel-subhead" style="margin-top: 6px;">LAYERS</div>
         <div class="layer-toggles">
-          <label><input type="checkbox" id="toggle-orbits" checked> Trajectory Lines</label>
+          <label><input type="checkbox" id="toggle-orbits" checked> Orbit Lines</label>
           <label><input type="checkbox" id="toggle-moon" checked> Moon &amp; 1 LD Ring</label>
-          <label><input type="checkbox" id="toggle-satellites" checked> GEO / LEO Orbits</label>
+          <label><input type="checkbox" id="toggle-satellites" checked> GEO / LEO Rings</label>
         </div>
       </aside>
     </main>
@@ -117,20 +184,20 @@
     <!-- Bottom Timeline Scrubber -->
     <footer class="hud-footer">
       <div class="timeline-container">
-        <button id="btn-play" class="hud-btn">
+        <button id="btn-play" class="hud-btn active">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
           PLAY
         </button>
 
-        <button id="btn-step-back" class="hud-btn" title="Step Back 1 Hour">◄ -1h</button>
-        <button id="btn-step-fwd" class="hud-btn" title="Step Forward 1 Hour">+1h ►</button>
+        <button id="btn-step-back" class="hud-btn" title="Step Back 1 Hour">&lang; -1h</button>
+        <button id="btn-step-fwd" class="hud-btn" title="Step Forward 1 Hour">+1h &rang;</button>
 
         <div class="timeline-slider-wrap">
           <input type="range" id="timeline-slider" min="-24" max="24" step="0.05" value="0">
           <div class="timeline-marks">
             <span>T -24h</span>
             <span>T -12h</span>
-            <span style="color: #ef4444; font-weight: bold;">ENCOUNTER (T=0)</span>
+            <span style="color: var(--color-purple-light); font-weight: bold;">ENCOUNTER (T=0)</span>
             <span>T +12h</span>
             <span>T +24h</span>
           </div>
@@ -144,11 +211,11 @@
           CLOSEST APPROACH
         </button>
 
-        <select id="speed-select" class="styled-select" style="width: 100px;" title="Simulation Speed">
-          <option value="60">1 min/s</option>
-          <option value="3600" selected>1 hr/s</option>
-          <option value="14400">4 hr/s</option>
-          <option value="86400">1 day/s</option>
+        <select id="speed-select" class="styled-select" style="width: 110px;" title="Simulation Speed">
+          <option value="60">1 min / s</option>
+          <option value="3600" selected>1 hour / s</option>
+          <option value="14400">4 hours / s</option>
+          <option value="86400">1 day / s</option>
         </select>
       </div>
     </footer>
@@ -170,14 +237,14 @@
 
         <!-- Tab 1: Keplerian Dials -->
         <div id="tab-kepler" class="lab-tab-content active">
-          <p style="font-size: 12px; color: #94a3b8;">
+          <p style="font-size: 12px; color: var(--text-secondary);">
             Modify the classical 6-element Keplerian orbital parameters to witness how orbital eccentricity, semi-major axis, and inclination deform the asteroid's orbit in real-time.
           </p>
 
           <div class="slider-group">
             <div class="slider-header">
               <span>Semi-Major Axis (a)</span>
-              <span id="val-dial-a" style="color: var(--text-cyan);">1.35 AU</span>
+              <span id="val-dial-a" style="color: var(--text-purple-highlight);">1.35 AU</span>
             </div>
             <input type="range" id="dial-a" min="0.6" max="3.0" step="0.01" value="1.35">
           </div>
@@ -185,7 +252,7 @@
           <div class="slider-group">
             <div class="slider-header">
               <span>Eccentricity (e)</span>
-              <span id="val-dial-e" style="color: var(--text-cyan);">0.32</span>
+              <span id="val-dial-e" style="color: var(--text-purple-highlight);">0.32</span>
             </div>
             <input type="range" id="dial-e" min="0.0" max="0.85" step="0.01" value="0.32">
           </div>
@@ -193,18 +260,18 @@
           <div class="slider-group">
             <div class="slider-header">
               <span>Inclination (i)</span>
-              <span id="val-dial-i" style="color: var(--text-cyan);">4.8°</span>
+              <span id="val-dial-i" style="color: var(--text-purple-highlight);">4.8&deg;</span>
             </div>
             <input type="range" id="dial-i" min="0" max="45" step="0.5" value="4.78">
           </div>
 
           <div class="results-grid">
             <div class="result-card">
-              <div class="result-card-label">Perihelion Distance (q = a*(1-e))</div>
+              <div class="result-card-label">Perihelion Distance (q = a &times; (1 - e))</div>
               <div id="kepler-perihelion" class="result-card-val">0.918 AU</div>
             </div>
             <div class="result-card">
-              <div class="result-card-label">Aphelion Distance (Q = a*(1+e))</div>
+              <div class="result-card-label">Aphelion Distance (Q = a &times; (1 + e))</div>
               <div id="kepler-aphelion" class="result-card-val">1.782 AU</div>
             </div>
           </div>
@@ -212,14 +279,14 @@
 
         <!-- Tab 2: DART Deflection -->
         <div id="tab-dart" class="lab-tab-content">
-          <p style="font-size: 12px; color: #94a3b8;">
+          <p style="font-size: 12px; color: var(--text-secondary);">
             Simulate NASA's Double Asteroid Redirection Test (DART) momentum transfer. See how momentum enhancement factor (&beta; &approx; 2.5) and warning lead time allow a small spacecraft to divert a multi-ton asteroid away from Earth.
           </p>
 
           <div class="slider-group">
             <div class="slider-header">
               <span>Warning Lead Time</span>
-              <span id="val-dart-lead" style="color: var(--text-cyan);">5.0 years</span>
+              <span id="val-dart-lead" style="color: var(--text-purple-highlight);">5.0 years</span>
             </div>
             <input type="range" id="dart-lead-time" min="1" max="25" step="0.5" value="5">
           </div>
@@ -227,7 +294,7 @@
           <div class="slider-group">
             <div class="slider-header">
               <span>Impactor Spacecraft Mass</span>
-              <span id="val-dart-mass" style="color: var(--text-cyan);">600 kg</span>
+              <span id="val-dart-mass" style="color: var(--text-purple-highlight);">600 kg</span>
             </div>
             <input type="range" id="dart-impactor-mass" min="100" max="3000" step="50" value="600">
           </div>
@@ -254,14 +321,14 @@
 
         <!-- Tab 3: Impact Consequences -->
         <div id="tab-crater" class="lab-tab-content">
-          <p style="font-size: 12px; color: #94a3b8;">
-            Calculate the physical consequences if the asteroid entered Earth's atmosphere based on the Collins, Melosh &amp; Marcus (2005) planetary impact formulations.
+          <p style="font-size: 12px; color: var(--text-secondary);">
+            Calculate the physical consequences if the asteroid entered Earth's atmosphere based on Collins, Melosh &amp; Marcus (2005) planetary impact formulations.
           </p>
 
           <div class="slider-group">
             <div class="slider-header">
               <span>Asteroid Diameter</span>
-              <span id="val-crater-diam" style="color: var(--text-cyan);">50 m</span>
+              <span id="val-crater-diam" style="color: var(--text-purple-highlight);">50 m</span>
             </div>
             <input type="range" id="crater-diam" min="10" max="500" step="5" value="50">
           </div>
@@ -269,7 +336,7 @@
           <div class="slider-group">
             <div class="slider-header">
               <span>Impact Velocity</span>
-              <span id="val-crater-vel" style="color: var(--text-cyan);">15 km/s</span>
+              <span id="val-crater-vel" style="color: var(--text-purple-highlight);">15 km/s</span>
             </div>
             <input type="range" id="crater-vel" min="11" max="50" step="1" value="15">
           </div>
@@ -309,16 +376,16 @@
           <h3 id="ml-target-title" style="color: #fff; font-size: 14px; font-family: var(--font-mono);">
             TARGET: 2026 RZ1
           </h3>
-          <span style="font-size: 11px; color: var(--text-muted);">
-            Ensemble Decision Network &bull; Confidence: <strong id="ml-conf-value" style="color: var(--text-cyan);">94.8%</strong>
+          <span style="font-size: 11px; color: var(--text-secondary);">
+            Ensemble Decision Network &bull; Confidence: <strong id="ml-conf-value" style="color: var(--text-purple-highlight);">94.8%</strong>
           </span>
         </div>
 
         <div class="results-grid">
-          <div class="result-card" style="border-left: 3px solid var(--text-cyan);">
+          <div class="result-card" style="border-left: 3px solid var(--color-purple);">
             <div class="result-card-label">Torino Impact Scale (0 - 10)</div>
-            <div id="ml-torino-value" class="result-card-val" style="font-size: 24px; color: #00e5ff;">0</div>
-            <div id="ml-torino-desc" style="font-size: 11px; color: #94a3b8; margin-top: 4px;">
+            <div id="ml-torino-value" class="result-card-val" style="font-size: 24px; color: var(--color-purple-light);">0</div>
+            <div id="ml-torino-desc" style="font-size: 11px; color: var(--text-secondary); margin-top: 4px;">
               No Hazard (Zone 0 - White)
             </div>
           </div>
@@ -326,35 +393,33 @@
           <div class="result-card">
             <div class="result-card-label">Palermo Technical Scale</div>
             <div id="ml-palermo-value" class="result-card-val">-4.80</div>
-            <div style="font-size: 11px; color: #94a3b8; margin-top: 4px;">
+            <div style="font-size: 11px; color: var(--text-secondary); margin-top: 4px;">
               Well below background hazard threshold
             </div>
           </div>
         </div>
 
         <div>
-          <h4 style="font-size: 12px; font-family: var(--font-mono); color: var(--text-muted); margin-bottom: 8px;">
+          <h4 style="font-size: 12px; font-family: var(--font-mono); color: var(--text-secondary); margin-bottom: 8px;">
             ML FEATURE IMPORTANCE WEIGHTS:
           </h4>
-          <div id="ml-feature-bars">
-            <!-- Dynamically populated -->
-          </div>
+          <div id="ml-feature-bars"></div>
         </div>
 
-        <hr style="border: none; border-top: 1px solid rgba(255,255,255,0.1); margin: 6px 0;">
+        <hr style="border: none; border-top: 1px solid rgba(139,92,246,0.2); margin: 6px 0;">
 
         <div>
-          <h4 style="font-size: 13px; font-family: var(--font-mono); color: var(--text-cyan); margin-bottom: 8px;">
+          <h4 style="font-size: 13px; font-family: var(--font-mono); color: var(--text-purple-highlight); margin-bottom: 8px;">
             INTERACTIVE SYNTHETIC ASTEROID TESTER
           </h4>
-          <p style="font-size: 11px; color: #94a3b8; margin-bottom: 10px;">
+          <p style="font-size: 11px; color: var(--text-secondary); margin-bottom: 10px;">
             Students can test any arbitrary asteroid size, speed, and miss distance to see the neural model classify the risk in real-time.
           </p>
 
           <div class="slider-group">
             <div class="slider-header">
               <span>Synthetic Diameter</span>
-              <span id="val-custom-diam" style="color: var(--text-cyan);">60 m</span>
+              <span id="val-custom-diam" style="color: var(--text-purple-highlight);">60 m</span>
             </div>
             <input type="range" id="custom-diam" min="5" max="1500" step="5" value="60">
           </div>
@@ -362,7 +427,7 @@
           <div class="slider-group">
             <div class="slider-header">
               <span>Synthetic Encounter Velocity</span>
-              <span id="val-custom-vel" style="color: var(--text-cyan);">15 km/s</span>
+              <span id="val-custom-vel" style="color: var(--text-purple-highlight);">15 km/s</span>
             </div>
             <input type="range" id="custom-vel" min="5" max="60" step="1" value="15">
           </div>
@@ -370,19 +435,19 @@
           <div class="slider-group">
             <div class="slider-header">
               <span>Miss Distance</span>
-              <span id="val-custom-miss" style="color: var(--text-cyan);">150,000 km (0.39 LD)</span>
+              <span id="val-custom-miss" style="color: var(--text-purple-highlight);">150,000 km (0.39 LD)</span>
             </div>
             <input type="range" id="custom-miss" min="0" max="1500000" step="10000" value="150000">
           </div>
 
           <div class="result-card" style="margin-top: 10px;">
-            <div id="out-custom-torino" style="font-family: var(--font-mono); font-size: 15px; font-weight: bold; color: #00e5ff;">
+            <div id="out-custom-torino" style="font-family: var(--font-mono); font-size: 15px; font-weight: bold; color: var(--color-purple-light);">
               Torino Scale: 0
             </div>
             <div id="out-custom-hazard" style="font-size: 12px; color: #cbd5e1; margin-top: 4px;">
               No Hazard / Routine Close Approach
             </div>
-            <div id="out-custom-energy" style="font-size: 11px; color: #94a3b8; margin-top: 4px;">
+            <div id="out-custom-energy" style="font-size: 11px; color: var(--text-secondary); margin-top: 4px;">
               Kinetic Yield: 2.1 MT TNT (140 Hiroshima bombs)
             </div>
           </div>
@@ -399,10 +464,9 @@
         <button id="btn-close-compliance" class="modal-close-btn">&times;</button>
       </div>
       <div class="modal-body">
-        <!-- Author Profile -->
         <div class="author-profile-card">
           <div class="author-avatar">
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
           </div>
           <div class="author-info">
             <h3>Aerospace Technologist &amp; Planetary Defense Researcher</h3>
@@ -412,12 +476,11 @@
           </div>
         </div>
 
-        <!-- Compliance & Legal -->
         <div>
-          <h4 style="font-size: 12px; font-family: var(--font-mono); color: var(--text-cyan); margin-bottom: 6px;">
+          <h4 style="font-size: 12px; font-family: var(--font-mono); color: var(--text-purple-highlight); margin-bottom: 6px;">
             DATA PROVENANCE &amp; NASA OPEN DATA POLICY COMPLIANCE
           </h4>
-          <p style="font-size: 12px; color: #94a3b8; line-height: 1.5;">
+          <p style="font-size: 12px; color: var(--text-secondary); line-height: 1.5;">
             This software strictly complies with the <strong>NASA Open Data Policy (17 U.S.C. &sect; 105)</strong> and is distributed under the MIT Open Source License. Planetary orbital data, close approach ephemerides, and asteroid parameters are ingested from:
           </p>
           <ul style="font-size: 12px; color: #cbd5e1; margin-left: 20px; margin-top: 6px; line-height: 1.6;">
@@ -430,25 +493,24 @@
           </p>
         </div>
 
-        <!-- Custom NASA API Key -->
         <div>
-          <h4 style="font-size: 12px; font-family: var(--font-mono); color: var(--text-cyan); margin-bottom: 6px;">
+          <h4 style="font-size: 12px; font-family: var(--font-mono); color: var(--text-purple-highlight); margin-bottom: 6px;">
             NASA API KEY CONFIGURATION (OPTIONAL)
           </h4>
-          <p style="font-size: 11px; color: #94a3b8; margin-bottom: 8px;">
-            By default, public requests utilize NASA's shared DEMO_KEY. To increase hourly request limits to 1,000 req/hr, enter your free key from <a href="https://api.nasa.gov" target="_blank" rel="noopener" style="color: var(--text-cyan);">api.nasa.gov</a>.
+          <p style="font-size: 11px; color: var(--text-secondary); margin-bottom: 8px;">
+            By default, public requests utilize NASA's shared DEMO_KEY. To increase hourly request limits to 1,000 req/hr, enter your free key from <a href="https://api.nasa.gov" target="_blank" rel="noopener" style="color: var(--color-purple-light);">api.nasa.gov</a>.
           </p>
           <div class="api-key-box">
             <input type="text" id="input-nasa-api-key" class="styled-input" placeholder="Enter NASA API Key (e.g. DEMO_KEY)">
             <button id="btn-save-api-key" class="hud-btn active">SAVE KEY</button>
           </div>
-          <div id="api-key-status" style="font-size: 11px; color: #94a3b8; margin-top: 4px;">Public DEMO_KEY Active</div>
+          <div id="api-key-status" style="font-size: 11px; color: var(--text-secondary); margin-top: 4px;">Public DEMO_KEY Active</div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Application Entry Point -->
+  <!-- Entry Script -->
   <script type="module" src="./src/main.js"></script>
 </body>
 </html>
