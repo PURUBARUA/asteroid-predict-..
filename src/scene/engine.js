@@ -1,9 +1,14 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
+import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer.js";
+import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass.js";
+import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPass.js";
+import { OutputPass } from "three/examples/jsm/postprocessing/OutputPass.js";
 import { buildEarth } from "./earth.js";
 import { createStarfield, buildMoonSystem, buildSatelliteRings } from "./celestial.js";
 import { createAsteroidMesh, createTrajectoryLine, createPerigeeVector } from "./asteroidModel.js";
 import { buildSolarSystem } from "./solarSystem.js";
+import { buildDeepSpaceEnvironment } from "./deepSpace.js";
 import { propagateGeocentricFlyby, generateOrbitPath, propagateKeplerian } from "../physics/kepler.js";
 
 export class SceneEngine {
@@ -43,9 +48,25 @@ export class SceneEngine {
     this.renderer.setSize(width, height);
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    this.renderer.toneMappingExposure = 1.2;
+    this.renderer.toneMappingExposure = 1.3;
 
     this.container.appendChild(this.renderer.domElement);
+
+    // ─── BLOOM POST-PROCESSING ────────────────────────────────────────────────
+    this.composer = new EffectComposer(this.renderer);
+    const renderPass = new RenderPass(this.scene, this.camera);
+    this.composer.addPass(renderPass);
+
+    this.bloomPass = new UnrealBloomPass(
+      new THREE.Vector2(width, height),
+      0.65,   // bloom strength
+      0.5,    // bloom radius
+      0.7     // bloom threshold
+    );
+    this.composer.addPass(this.bloomPass);
+
+    const outputPass = new OutputPass();
+    this.composer.addPass(outputPass);
   }
 
   initSceneObjects() {
@@ -87,15 +108,27 @@ export class SceneEngine {
     this.solarSystem = buildSolarSystem();
     this.solarSystem.group.visible = false;
     this.scene.add(this.solarSystem.group);
+
+    // Deep Space: Galaxies, Nebulae, Milky Way Band, Cosmic Dust
+    this.deepSpace = buildDeepSpaceEnvironment();
+    this.scene.add(this.deepSpace.group);
+
+    // Subtle cosmic purple-blue fog for depth atmosphere
+    this.scene.fog = new THREE.FogExp2(0x0a0818, 0.00065);
   }
 
   initControls() {
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
     this.controls.enableDamping = true;
-    this.controls.dampingFactor = 0.05;
+    this.controls.dampingFactor = 0.035;
+    this.controls.rotateSpeed = 0.6;
+    this.controls.zoomSpeed = 0.8;
     this.controls.minDistance = 2.0;
-    this.controls.maxDistance = 1200.0;
+    this.controls.maxDistance = 2000.0;
     this.controls.maxPolarAngle = Math.PI - 0.05;
+    // Smooth auto-rotate when idle
+    this.controls.autoRotate = true;
+    this.controls.autoRotateSpeed = 0.15;
   }
 
   bindEvents() {
@@ -105,6 +138,8 @@ export class SceneEngine {
       this.camera.aspect = w / h;
       this.camera.updateProjectionMatrix();
       this.renderer.setSize(w, h);
+      this.composer.setSize(w, h);
+      this.bloomPass.resolution.set(w, h);
     });
   }
 
@@ -285,7 +320,7 @@ export class SceneEngine {
     requestAnimationFrame(() => this.animate());
 
     const now = performance.now();
-    const deltaSec = (now - this.lastFrameTime) / 1000;
+    const deltaSec = Math.min((now - this.lastFrameTime) / 1000, 0.1); // clamp for tab-away
     this.lastFrameTime = now;
 
     // Update solar system revolution and rotation
@@ -293,14 +328,21 @@ export class SceneEngine {
       this.solarSystem.update(deltaSec);
     }
 
-    if (this.earth && this.earth.visible) {
-      const mesh = this.earth.getObjectByName("EarthMesh");
-      if (mesh) mesh.rotation.y += 0.0012;
+    // Update deep space objects (slow galactic rotation, dust shimmer)
+    if (this.deepSpace) {
+      this.deepSpace.update(deltaSec);
     }
 
+    // Smooth framerate-independent Earth rotation
+    if (this.earth && this.earth.visible) {
+      const mesh = this.earth.getObjectByName("EarthMesh");
+      if (mesh) mesh.rotation.y += 0.0012 * deltaSec * 60;
+    }
+
+    // Smooth asteroid tumble + reticle face camera
     if (this.asteroidMesh) {
-      this.asteroidMesh.rotation.x += 0.008;
-      this.asteroidMesh.rotation.y += 0.012;
+      this.asteroidMesh.rotation.x += 0.006 * deltaSec * 60;
+      this.asteroidMesh.rotation.y += 0.009 * deltaSec * 60;
       const reticle = this.asteroidMesh.getObjectByName("TargetReticle");
       if (reticle) reticle.lookAt(this.camera.position);
     }
@@ -310,8 +352,15 @@ export class SceneEngine {
       this.moonSystem.update(angle);
     }
 
+    // Slow starfield drift for parallax depth
+    if (this.starfield) {
+      this.starfield.rotation.y += 0.00003 * deltaSec * 60;
+    }
+
     this.controls.update();
-    this.renderer.render(this.scene, this.camera);
+
+    // Render through bloom composer for cinematic glow
+    this.composer.render();
 
     // Update 3D projected screen labels
     if (this.onLabelUpdate) {
@@ -356,6 +405,21 @@ export class SceneEngine {
             });
           }
         });
+
+        // Galaxy & Nebula labels (visible when zoomed out)
+        if (this.deepSpace) {
+          this.deepSpace.labelsList.forEach(dl => {
+            const scr = this.toScreenPosition(dl.mesh);
+            if (scr.visible) {
+              activeLabels.push({
+                id: dl.id,
+                name: dl.name,
+                pos: scr,
+                type: dl.type
+              });
+            }
+          });
+        }
 
         this.onLabelUpdate({
           viewMode: "heliocentric",

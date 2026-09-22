@@ -10,21 +10,29 @@ import * as THREE from "three";
  */
 
 export function createStarfield(count = 4500, radius = 800) {
+  const group = new THREE.Group();
+  group.name = "DeepSpaceStarfield";
+
+  // ── Main starfield ──
   const geometry = new THREE.BufferGeometry();
   const positions = new Float32Array(count * 3);
   const colors = new Float32Array(count * 3);
 
   const starColors = [
     new THREE.Color("#ffffff"),
-    new THREE.Color("#c084fc"), // Purple-blue stars
+    new THREE.Color("#e0d4ff"), // Lavender white
+    new THREE.Color("#c084fc"), // Purple stars
+    new THREE.Color("#a855f7"), // Violet stars
     new THREE.Color("#818cf8"), // Indigo stars
-    new THREE.Color("#93c5fd")  // Blue stars
+    new THREE.Color("#93c5fd"), // Blue stars
+    new THREE.Color("#7c3aed"), // Deep violet
+    new THREE.Color("#6366f1")  // Electric indigo
   ];
 
   for (let i = 0; i < count; i++) {
     const theta = Math.random() * Math.PI * 2;
     const phi = Math.acos(2 * Math.random() - 1);
-    const r = radius + (Math.random() - 0.5) * 120;
+    const r = radius + (Math.random() - 0.5) * 200;
 
     positions[i * 3] = r * Math.sin(phi) * Math.cos(theta);
     positions[i * 3 + 1] = r * Math.sin(phi) * Math.sin(theta);
@@ -43,12 +51,54 @@ export function createStarfield(count = 4500, radius = 800) {
     size: 1.6,
     vertexColors: true,
     transparent: true,
-    opacity: 0.85
+    opacity: 0.9,
+    blending: THREE.AdditiveBlending,
+    depthWrite: false
   });
 
   const stars = new THREE.Points(geometry, material);
-  stars.name = "DeepSpaceStarfield";
-  return stars;
+  group.add(stars);
+
+  // ── Bright diamond stars (larger, glowing) ──
+  const diamondCount = 120;
+  const dGeo = new THREE.BufferGeometry();
+  const dPos = new Float32Array(diamondCount * 3);
+  const dCol = new Float32Array(diamondCount * 3);
+
+  for (let i = 0; i < diamondCount; i++) {
+    const theta = Math.random() * Math.PI * 2;
+    const phi = Math.acos(2 * Math.random() - 1);
+    const r = radius * 0.7 + Math.random() * radius * 0.5;
+
+    dPos[i * 3] = r * Math.sin(phi) * Math.cos(theta);
+    dPos[i * 3 + 1] = r * Math.sin(phi) * Math.sin(theta);
+    dPos[i * 3 + 2] = r * Math.cos(phi);
+
+    // Bright blue-violet-white
+    const hue = 240 + Math.random() * 40;
+    const c = new THREE.Color(`hsl(${hue}, 80%, ${85 + Math.random() * 15}%)`);
+    dCol[i * 3] = c.r;
+    dCol[i * 3 + 1] = c.g;
+    dCol[i * 3 + 2] = c.b;
+  }
+
+  dGeo.setAttribute("position", new THREE.BufferAttribute(dPos, 3));
+  dGeo.setAttribute("color", new THREE.BufferAttribute(dCol, 3));
+
+  const dMat = new THREE.PointsMaterial({
+    size: 3.5,
+    vertexColors: true,
+    transparent: true,
+    opacity: 0.75,
+    blending: THREE.AdditiveBlending,
+    depthWrite: false
+  });
+
+  const diamonds = new THREE.Points(dGeo, dMat);
+  diamonds.name = "DiamondStars";
+  group.add(diamonds);
+
+  return group;
 }
 
 export function createOrbitRing(radius, color = "#6366f1", dashed = false, opacity = 0.45) {

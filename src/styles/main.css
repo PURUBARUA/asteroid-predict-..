@@ -79,17 +79,20 @@ body, html {
 .floating-3d-label {
   position: absolute;
   pointer-events: none;
-  transform: translate(-50%, -100%);
+  transform: translate(-50%, -100%) scale(0.85);
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 3px;
   opacity: 0;
-  transition: opacity 0.25s ease;
+  transition: opacity 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+              transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  will-change: transform, opacity, left, top;
 }
 
 .floating-3d-label.visible {
   opacity: 1;
+  transform: translate(-50%, -100%) scale(1);
 }
 
 .label-pointer {
@@ -146,6 +149,37 @@ body, html {
 .floating-3d-label.asteroid .label-dot {
   background: var(--color-purple-light);
   box-shadow: 0 0 10px var(--color-purple-light);
+}
+
+.floating-3d-label.galaxy .label-dot {
+  background: #a78bfa;
+  box-shadow: 0 0 12px #a78bfa, 0 0 24px rgba(167, 139, 250, 0.4);
+  animation: pulse-glow 3s ease-in-out infinite;
+}
+
+.floating-3d-label.galaxy .label-content {
+  font-size: 10px;
+  border-color: rgba(167, 139, 250, 0.5);
+  background: rgba(20, 16, 50, 0.85);
+  box-shadow: 0 0 16px rgba(167, 139, 250, 0.35);
+}
+
+.floating-3d-label.nebula .label-dot {
+  background: #c084fc;
+  box-shadow: 0 0 14px #c084fc, 0 0 28px rgba(192, 132, 252, 0.35);
+  animation: pulse-glow 4s ease-in-out infinite;
+}
+
+.floating-3d-label.nebula .label-content {
+  font-size: 10px;
+  border-color: rgba(192, 132, 252, 0.4);
+  background: rgba(25, 12, 48, 0.82);
+  box-shadow: 0 0 16px rgba(192, 132, 252, 0.3);
+}
+
+@keyframes pulse-glow {
+  0%, 100% { opacity: 0.7; transform: scale(1); }
+  50%      { opacity: 1; transform: scale(1.3); }
 }
 
 /* ==========================================================================
