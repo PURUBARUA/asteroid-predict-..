@@ -86,6 +86,15 @@ export class HudController {
       });
     }
 
+    // Zen Mode Toggle
+    const btnZen = document.getElementById("btn-zen-mode");
+    if (btnZen) {
+      btnZen.addEventListener("click", () => {
+        document.body.classList.toggle("zen-mode");
+        if (window.soundFX) window.soundFX.playTelemetryClick();
+      });
+    }
+
     // Solar Body focus selector
     if (this.solarBodySelect) {
       this.solarBodySelect.addEventListener("change", (e) => {

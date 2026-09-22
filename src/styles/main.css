@@ -1067,3 +1067,56 @@ input[type=range]::-webkit-slider-thumb {
 .controls-card.collapsed .collapse-toggle-btn.right {
   transform: translateY(-50%) rotate(180deg);
 }
+
+/* ZEN MODE (FULL SCREEN UI HIDE) */
+body.zen-mode .hud-overlay {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s ease;
+}
+.hud-overlay {
+  transition: opacity 0.4s ease;
+}
+body.zen-mode #labels-container {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s ease;
+}
+#labels-container {
+  transition: opacity 0.4s ease;
+}
+
+.zen-toggle-btn {
+  position: fixed;
+  bottom: 24px;
+  left: 24px;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--bg-card);
+  border: 1px solid var(--border-purple-glow);
+  color: var(--text-purple-highlight);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  z-index: 9999;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+.zen-toggle-btn:hover {
+  background: var(--color-purple);
+  color: #fff;
+  transform: scale(1.1);
+  box-shadow: 0 4px 20px rgba(139, 92, 246, 0.6);
+}
+body.zen-mode .zen-toggle-btn {
+  background: rgba(13, 18, 43, 0.3);
+  border-color: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.5);
+}
+body.zen-mode .zen-toggle-btn:hover {
+  background: var(--color-purple);
+  color: #fff;
+}

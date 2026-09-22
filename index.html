@@ -22,19 +22,12 @@
     <!-- Top Header (Independent Cosmic Orbit Style) -->
     <header class="hud-header">
       <div class="brand-section">
-        <!-- Cosmic Gyroscope Emblem -->
-        <div class="cosmic-emblem" title="Cosmic Orbit Planetary Defense">
-          <div class="cosmic-emblem-core"></div>
-          <div class="cosmic-emblem-ring1"></div>
-          <div class="cosmic-emblem-ring2"></div>
-        </div>
-
         <div class="brand-titles">
           <div class="brand-title-wrap">
-            <span class="brand-title">Cosmic Orbit</span>
+            <span class="brand-title" style="letter-spacing: 2px;">COSMIC ORBIT</span>
             <span class="badge-watch-mode">SOLAR SYSTEM &amp; ASTEROID WATCH</span>
           </div>
-          <span class="brand-sub">Planetary Defense Coordination &bull; Deep Space Dynamics Lab</span>
+          
         </div>
       </div>
 
@@ -55,16 +48,13 @@
         <select id="theme-select" class="styled-select" style="width: 130px;" title="Select UI Theme"><option value="purple" selected>Cosmic Purple</option><option value="cyan">Neon Blue</option><option value="dark">Dark Matter</option></select>
         <button id="btn-open-student-lab" class="hud-btn" title="Open Interactive Student Orbital Mechanics Laboratory">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
-          STUDENT LAB
-        </button>
+          </button>
         <button id="btn-open-ml" class="hud-btn" title="Open Machine Learning Threat &amp; Torino Predictor">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
-          ML PREDICTOR
-        </button>
+          </button>
         <button id="btn-open-compliance" class="hud-btn" title="View Science Data Attribution &amp; Aerospace Portfolio">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
-          DATA &amp; BIO
-        </button>
+          </button>
         <button id="btn-sound-toggle" class="hud-btn" title="Toggle Audio FX">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
         </button>
@@ -134,11 +124,7 @@
           </div>
         </div>
 
-        <!-- Narrative brief -->
-        <div id="hud-narrative-brief" class="narrative-brief">
-          Discovered during automated deep-sky planetary defense surveys, 2026 RZ1 makes an exceptionally close, photogenic encounter with Earth on September 12, 2026, passing well inside the Moon's orbit at 0.46 Lunar Distances (176,800 km). Highly monitored by deep space radar communications networks.
-        </div>
-      </section>
+        </section>
 
       <!-- Right View & Layer Controls -->
       <aside class="controls-card">
@@ -540,6 +526,11 @@
     </div>
   </div>
 
+    <!-- Master UI Toggle (Zen Mode) -->
+  <button id="btn-zen-mode" class="zen-toggle-btn" title="Toggle Full Screen Mode">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
+  </button>
+  
   <!-- Entry Script -->
   <script type="module" src="./src/main.js"></script>
 </body>
