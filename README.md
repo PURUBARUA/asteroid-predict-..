@@ -48,44 +48,6 @@
 
 ---
 
-### 4. Machine Learning Hazard & Trajectory Classifier
-- Pre-trained client-side decision network calibrated on historical Near-Earth Objects.
-- Predicts:
-  - **Torino Impact Hazard Scale (0 to 10)**
-  - **Palermo Technical Impact Scale**
-  - **Atmospheric Entry Fate** (Harmless ablation, airburst, or surface cratering)
-- **Interactive Synthetic Asteroid Studio**: Test custom asteroid sizes, speeds, and miss distances with live ML risk feedback.
-
----
-
-## 🚀 Quick Start (Local Development)
-
-```bash
-# Clone repository
-git clone https://github.com/<your-username>/<your-repo>.git
-cd <your-repo>
-
-# Install dependencies
-npm install
-
-# Start development server
-npm run dev
-```
-
-Visit `http://localhost:3000` in your web browser.
-
----
-
-## 🌐 Deploying to GitHub Pages
-
-1. Push to your GitHub repository:
-   ```bash
-   git remote add origin https://github.com/<your-username>/<your-repo>.git
-   git branch -M main
-   git push -u origin main
-   ```
-2. In GitHub repository **Settings > Pages > Build and deployment > Source**, select **GitHub Actions**.
-3. Automated deployment will publish your site at `https://<your-username>.github.io/<your-repo>/`.
 
 ---
 
