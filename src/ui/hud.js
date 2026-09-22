@@ -58,6 +58,34 @@ export class HudController {
   }
 
   bindEvents() {
+    // Theme Selector
+    const themeSelect = document.getElementById("theme-select");
+    if (themeSelect) {
+      themeSelect.addEventListener("change", (e) => {
+        document.documentElement.setAttribute("data-theme", e.target.value);
+        if (window.soundFX) window.soundFX.playTelemetryClick();
+      });
+    }
+
+    // Collapse Panels
+    const btnLeft = document.getElementById("btn-collapse-left");
+    const watchCard = document.querySelector(".asteroid-watch-card");
+    if (btnLeft && watchCard) {
+      btnLeft.addEventListener("click", () => {
+        watchCard.classList.toggle("collapsed");
+        if (window.soundFX) window.soundFX.playTelemetryClick();
+      });
+    }
+
+    const btnRight = document.getElementById("btn-collapse-right");
+    const controlsCard = document.querySelector(".controls-card");
+    if (btnRight && controlsCard) {
+      btnRight.addEventListener("click", () => {
+        controlsCard.classList.toggle("collapsed");
+        if (window.soundFX) window.soundFX.playTelemetryClick();
+      });
+    }
+
     // Solar Body focus selector
     if (this.solarBodySelect) {
       this.solarBodySelect.addEventListener("change", (e) => {

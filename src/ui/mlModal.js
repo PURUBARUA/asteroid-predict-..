@@ -1,5 +1,5 @@
 import { soundFX } from "../audio/soundFX.js";
-import { predictAsteroidHazard } from "../ml/asteroidClassifier.js";
+import { predictAsteroidHazard, predictInterplanetaryCollision } from "../ml/asteroidClassifier.js";
 
 export class MLModalController {
   constructor() {
@@ -78,6 +78,26 @@ export class MLModalController {
     if (torinoDesc) torinoDesc.textContent = prediction.torinoDescription;
     if (palermoVal) palermoVal.textContent = prediction.palermoScale;
     if (confVal) confVal.textContent = `${(prediction.mlConfidenceScore * 100).toFixed(1)}%`;
+
+    // Interplanetary Prediction
+    const ipParams = {
+      eccentricity: this.currentNeo.orbital_elements?.eccentricity || 0.32,
+      semi_major_axis: this.currentNeo.orbital_elements?.semi_major_axis || 1.5,
+      inclinationDeg: this.currentNeo.orbital_elements?.inclination_deg || 4.78
+    };
+    const ipPrediction = predictInterplanetaryCollision(ipParams);
+
+    const marsEl = document.getElementById("ml-mars-risk");
+    if (marsEl) marsEl.textContent = ipPrediction.mars;
+    
+    const venusEl = document.getElementById("ml-venus-risk");
+    if (venusEl) venusEl.textContent = ipPrediction.venus;
+    
+    const jupEl = document.getElementById("ml-jupiter-risk");
+    if (jupEl) jupEl.textContent = ipPrediction.jupiter;
+    
+    const beltEl = document.getElementById("ml-belt-risk");
+    if (beltEl) beltEl.textContent = ipPrediction.belt;
 
     // Render feature importance bars
     const barsContainer = document.getElementById("ml-feature-bars");

@@ -2,6 +2,34 @@
    COSMIC ORBIT // SOLAR SYSTEM & ASTEROID WATCH - PURPLE-BLUE THEME
    ========================================================================== */
 
+/* THEMES */
+:root[data-theme="purple"] {
+  /* Default Purple/Blue */
+}
+:root[data-theme="cyan"] {
+  --bg-deep-space: #010a12;
+  --bg-card: rgba(4, 20, 30, 0.82);
+  --color-electric-blue: #22d3ee;
+  --color-royal-blue: #0ea5e9;
+  --color-indigo: #0284c7;
+  --color-purple: #0ea5e9;
+  --color-purple-light: #38bdf8;
+  --color-violet-glow: rgba(14, 165, 233, 0.45);
+  --border-purple-glow: rgba(14, 165, 233, 0.35);
+  --text-purple-highlight: #38bdf8;
+}
+:root[data-theme="dark"] {
+  --bg-deep-space: #050505;
+  --bg-card: rgba(20, 10, 10, 0.85);
+  --color-electric-blue: #f87171;
+  --color-royal-blue: #dc2626;
+  --color-indigo: #b91c1c;
+  --color-purple: #ef4444;
+  --color-purple-light: #fca5a5;
+  --color-violet-glow: rgba(239, 68, 68, 0.45);
+  --border-purple-glow: rgba(239, 68, 68, 0.35);
+  --text-purple-highlight: #f87171;
+}
 :root {
   /* Cosmic Purple-Blue Palette */
   --bg-deep-space: #02030b;
@@ -980,4 +1008,62 @@ input[type=range]::-webkit-slider-thumb {
   .header-search-wrap {
     display: none;
   }
+}
+
+/* COLLAPSE BEHAVIOR */
+.asteroid-watch-card {
+  transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+  position: relative;
+}
+.asteroid-watch-card.collapsed {
+  transform: translateX(calc(-100% - 30px));
+}
+.controls-card {
+  transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+  position: relative;
+}
+.controls-card.collapsed {
+  transform: translateX(calc(100% + 30px));
+}
+
+.collapse-toggle-btn {
+  position: absolute;
+  top: 50%;
+  right: -36px;
+  transform: translateY(-50%);
+  width: 24px;
+  height: 48px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-purple-glow);
+  border-left: none;
+  border-radius: 0 8px 8px 0;
+  color: var(--text-purple-highlight);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  font-size: 10px;
+  backdrop-filter: blur(8px);
+  z-index: 100;
+  transition: all 0.2s;
+  box-shadow: 4px 0 10px rgba(0,0,0,0.5);
+}
+.collapse-toggle-btn:hover {
+  background: var(--color-purple);
+  color: #fff;
+}
+.collapse-toggle-btn.right {
+  right: auto;
+  left: -36px;
+  border-radius: 8px 0 0 8px;
+  border-left: 1px solid var(--border-purple-glow);
+  border-right: none;
+  box-shadow: -4px 0 10px rgba(0,0,0,0.5);
+}
+
+.asteroid-watch-card.collapsed .collapse-toggle-btn {
+  transform: translateY(-50%) rotate(180deg);
+}
+.controls-card.collapsed .collapse-toggle-btn.right {
+  transform: translateY(-50%) rotate(180deg);
 }
