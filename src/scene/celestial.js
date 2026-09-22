@@ -143,23 +143,11 @@ export function buildMoonSystem(moonOrbitRadius = 28.0) {
   orbitRing.name = "MoonOrbitRing";
   moonGroup.add(orbitRing);
 
-  // Procedural Moon mesh
+  // Realistic Moon texture
   const moonGeo = new THREE.SphereGeometry(1.36, 32, 32);
-  const moonCanvas = document.createElement("canvas");
-  moonCanvas.width = 512;
-  moonCanvas.height = 256;
-  const ctx = moonCanvas.getContext("2d");
-  ctx.fillStyle = "#8a94a6";
-  ctx.fillRect(0, 0, moonCanvas.width, moonCanvas.height);
-  ctx.fillStyle = "#697282";
-  for (let i = 0; i < 60; i++) {
-    ctx.beginPath();
-    ctx.arc(Math.random() * 512, Math.random() * 256, 4 + Math.random() * 18, 0, Math.PI * 2);
-    ctx.fill();
-  }
-  const moonTexture = new THREE.CanvasTexture(moonCanvas);
+  const textureLoader = new THREE.TextureLoader();
   const moonMat = new THREE.MeshStandardMaterial({
-    map: moonTexture,
+    map: textureLoader.load('/textures/moon.jpg'),
     roughness: 0.9,
     metalness: 0.0
   });

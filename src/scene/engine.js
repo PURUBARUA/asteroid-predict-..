@@ -15,7 +15,7 @@ export class SceneEngine {
   constructor(canvasContainer, onLabelUpdate) {
     this.container = canvasContainer;
     this.onLabelUpdate = onLabelUpdate;
-    this.viewMode = "geocentric"; // "geocentric" or "heliocentric"
+    this.viewMode = "heliocentric"; // default to solar system view
     this.currentNeo = null;
     this.deltaHours = 0;
     this.focusedObject = null;
@@ -39,7 +39,7 @@ export class SceneEngine {
     const height = this.container.clientHeight || window.innerHeight;
 
     this.camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 8000);
-    this.camera.position.set(0, 24, 48);
+    this.camera.position.set(0, 160, 220); // heliocentric default position
 
     this.renderer = new THREE.WebGLRenderer({
       antialias: true,
@@ -86,14 +86,17 @@ export class SceneEngine {
     // Earth System (for Geocentric Close-Encounter Watch)
     this.earthRadius = 5.0;
     this.earth = buildEarth(this.earthRadius);
+    this.earth.visible = false;
     this.scene.add(this.earth);
 
     // Moon System (Geocentric 1 LD)
     this.moonSystem = buildMoonSystem(28.0);
+    this.moonSystem.group.visible = false;
     this.scene.add(this.moonSystem.group);
 
     // Satellites (GEO & LEO rings)
     this.satelliteRings = buildSatelliteRings(this.earthRadius);
+    this.satelliteRings.visible = false;
     this.scene.add(this.satelliteRings);
 
     // Asteroid Mesh
@@ -106,7 +109,7 @@ export class SceneEngine {
 
     // Full Solar System with 8 planets, Pluto, and 20+ moons
     this.solarSystem = buildSolarSystem();
-    this.solarSystem.group.visible = false;
+    this.solarSystem.group.visible = true;
     this.scene.add(this.solarSystem.group);
 
     // Deep Space: Galaxies, Nebulae, Milky Way Band, Cosmic Dust

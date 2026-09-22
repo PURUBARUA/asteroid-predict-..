@@ -5,6 +5,12 @@ import { createOrbitRing } from "./celestial.js";
  * Creates procedural texture for planets and moons
  */
 function createPlanetTexture(type, baseColor, detailColor, bands = false) {
+  const textureLoader = new THREE.TextureLoader();
+  const realistic = ["sun", "mercury", "venus", "earth", "mars", "jupiter", "saturn", "uranus", "neptune"];
+  if (realistic.includes(type)) {
+    return textureLoader.load(`/textures/${type}.jpg`);
+  }
+  
   const canvas = document.createElement("canvas");
   canvas.width = 1024;
   canvas.height = 512;
@@ -244,9 +250,13 @@ export function buildSolarSystem() {
   const systemGroup = new THREE.Group();
   systemGroup.name = "FullSolarSystem";
 
-  // Glowing Sun at center
+    // Glowing Sun at center
   const sunGeo = new THREE.SphereGeometry(7.5, 48, 48);
-  const sunMat = new THREE.MeshBasicMaterial({ color: 0xfffbeb });
+  const textureLoader = new THREE.TextureLoader();
+  const sunMat = new THREE.MeshBasicMaterial({ 
+    map: textureLoader.load('/textures/sun.jpg'),
+    color: 0xffffff // pure white base to let texture colors show
+  });
   const sunMesh = new THREE.Mesh(sunGeo, sunMat);
   sunMesh.name = "TheSun";
   systemGroup.add(sunMesh);
