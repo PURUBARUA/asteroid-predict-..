@@ -5,6 +5,7 @@ import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass.js";
 import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPass.js";
 import { OutputPass } from "three/examples/jsm/postprocessing/OutputPass.js";
 import { buildEarth } from "./earth.js";
+import { buildEarthSatelliteSwarm, updateSatelliteSwarm } from "./celestial.js";
 import { createStarfield, buildMoonSystem, buildSatelliteRings } from "./celestial.js";
 import { createAsteroidMesh, createTrajectoryLine, createPerigeeVector } from "./asteroidModel.js";
 import { buildSolarSystem } from "./solarSystem.js";
@@ -95,7 +96,7 @@ export class SceneEngine {
     this.scene.add(this.moonSystem.group);
 
     // Satellites (GEO & LEO rings)
-    this.satelliteRings = buildSatelliteRings(this.earthRadius);
+    this.satelliteRings = buildEarthSatelliteSwarm(this.earthRadius);
     this.satelliteRings.visible = false;
     this.scene.add(this.satelliteRings);
 
@@ -361,6 +362,11 @@ export class SceneEngine {
     }
 
     this.controls.update();
+
+    // Update satellite swarm if visible
+    if (this.satelliteRings && this.satelliteRings.visible) {
+      updateSatelliteSwarm(this.satelliteRings, deltaSec * 60);
+    }
 
     // Render through bloom composer for cinematic glow
     this.composer.render();

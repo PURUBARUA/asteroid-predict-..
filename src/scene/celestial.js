@@ -186,3 +186,105 @@ export function buildSatelliteRings(earthRadius = 5.0) {
 
   return group;
 }
+/**
+ * Procedural Earth Satellite Swarm (Simulating 8,000 active satellites in LEO, MEO, GEO)
+ * Realistic orbital planes and speeds.
+ */
+export function buildEarthSatelliteSwarm(earthRadius = 5.0) {
+  const LEO_COUNT = 7000;
+  const MEO_COUNT = 400;
+  const GEO_COUNT = 600;
+  const total = LEO_COUNT + MEO_COUNT + GEO_COUNT;
+
+  const geometry = new THREE.BufferGeometry();
+  const positions = new Float32Array(total * 3);
+  const colors = new Float32Array(total * 3);
+  const orbitParams = [];
+
+  const addSats = (startIndex, count, altMin, altMax, incMin, incMax, speedMin, speedMax, isGEO) => {
+    for (let i = 0; i < count; i++) {
+      const idx = startIndex + i;
+      
+      // Altitude & Radius
+      const alt = altMin + Math.random() * (altMax - altMin);
+      const radius = earthRadius * (1 + alt / 6371.0); // 6371km is Earth real radius
+
+      // Orbital elements
+      const inclination = isGEO ? (Math.random() * 0.1) : (incMin + Math.random() * (incMax - incMin));
+      const raan = Math.random() * Math.PI * 2;
+      const meanAnomaly = Math.random() * Math.PI * 2;
+      const meanMotion = speedMin + Math.random() * (speedMax - speedMin);
+
+      orbitParams.push({ radius, inclination, raan, meanAnomaly, meanMotion });
+
+      // Initial position will be updated in animation loop
+      positions[idx * 3] = 0;
+      positions[idx * 3 + 1] = 0;
+      positions[idx * 3 + 2] = 0;
+
+      // Color (Starlink/LEO = cyan-ish white, GPS/MEO = yellowish, GEO = orange-ish)
+      const color = new THREE.Color();
+      if (isGEO) {
+        color.setHSL(0.1, 0.8, 0.6 + Math.random() * 0.4);
+      } else if (count === MEO_COUNT) {
+        color.setHSL(0.15, 0.8, 0.7 + Math.random() * 0.3);
+      } else {
+        color.setHSL(0.55, 0.6, 0.8 + Math.random() * 0.2);
+      }
+      
+      colors[idx * 3] = color.r;
+      colors[idx * 3 + 1] = color.g;
+      colors[idx * 3 + 2] = color.b;
+    }
+  };
+
+  // LEO (e.g. Starlink, ISS) - Altitude 400-1200km, High inclination
+  addSats(0, LEO_COUNT, 400, 1200, 0.4, 1.7, 0.015, 0.025, false);
+  
+  // MEO (e.g. GPS) - Altitude ~20,000km
+  addSats(LEO_COUNT, MEO_COUNT, 19000, 21000, 0.9, 1.0, 0.005, 0.008, false);
+
+  // GEO - Altitude ~35,786km, Equatorial
+  addSats(LEO_COUNT + MEO_COUNT, GEO_COUNT, 35500, 36000, 0, 0, 0.002, 0.003, true);
+
+  geometry.setAttribute("position", new THREE.BufferAttribute(positions, 3));
+  geometry.setAttribute("color", new THREE.BufferAttribute(colors, 3));
+
+  const material = new THREE.PointsMaterial({
+    size: 0.06,
+    vertexColors: true,
+    transparent: true,
+    opacity: 0.85,
+    blending: THREE.AdditiveBlending,
+    depthWrite: false
+  });
+
+  const swarm = new THREE.Points(geometry, material);
+  swarm.name = "RealTimeSatelliteSwarm";
+  swarm.userData = { orbitParams };
+
+  return swarm;
+}
+
+export function updateSatelliteSwarm(swarm, deltaHours) {
+  if (!swarm || !swarm.userData.orbitParams) return;
+  const positions = swarm.geometry.attributes.position.array;
+  const params = swarm.userData.orbitParams;
+
+  for (let i = 0; i < params.length; i++) {
+    const p = params[i];
+    // Propagate orbit
+    p.meanAnomaly += p.meanMotion * deltaHours;
+    
+    // Keplerian to Cartesian (simplified for circular orbits)
+    const u = p.meanAnomaly; // argument of latitude
+    const x = p.radius * (Math.cos(p.raan) * Math.cos(u) - Math.sin(p.raan) * Math.sin(u) * Math.cos(p.inclination));
+    const z = p.radius * (Math.sin(p.raan) * Math.cos(u) + Math.cos(p.raan) * Math.sin(u) * Math.cos(p.inclination));
+    const y = p.radius * (Math.sin(u) * Math.sin(p.inclination));
+
+    positions[i * 3] = x;
+    positions[i * 3 + 1] = y;
+    positions[i * 3 + 2] = z;
+  }
+  swarm.geometry.attributes.position.needsUpdate = true;
+}

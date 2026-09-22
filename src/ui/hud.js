@@ -95,6 +95,55 @@ export class HudController {
       });
     }
 
+        // Removable & Draggable Asteroid Watch Card
+    const watchHeader = document.querySelector(".watch-card-header");
+    const btnCloseWatch = document.getElementById("btn-close-watch");
+    const btnRestoreWatch = document.getElementById("btn-restore-watch");
+
+    if (watchCard && watchHeader) {
+      let isDragging = false, startX, startY, initLeft, initTop;
+
+      watchHeader.addEventListener("mousedown", (e) => {
+        if (e.target.tagName === "BUTTON") return; // ignore clicks on buttons
+        isDragging = true;
+        startX = e.clientX;
+        startY = e.clientY;
+        const rect = watchCard.getBoundingClientRect();
+        initLeft = rect.left;
+        initTop = rect.top;
+        watchCard.style.transition = "none";
+        document.body.style.userSelect = "none";
+      });
+
+      window.addEventListener("mousemove", (e) => {
+        if (!isDragging) return;
+        watchCard.style.left = `${initLeft + (e.clientX - startX)}px`;
+        watchCard.style.top = `${initTop + (e.clientY - startY)}px`;
+        watchCard.style.transform = "none"; // clear collapse transform if dragged
+      });
+
+      window.addEventListener("mouseup", () => {
+        if (isDragging) {
+          isDragging = false;
+          watchCard.style.transition = "";
+          document.body.style.userSelect = "";
+        }
+      });
+    }
+
+    if (btnCloseWatch && watchCard && btnRestoreWatch) {
+      btnCloseWatch.addEventListener("click", () => {
+        watchCard.classList.add("hidden");
+        btnRestoreWatch.classList.add("visible");
+        if (window.soundFX) window.soundFX.playTelemetryClick();
+      });
+      btnRestoreWatch.addEventListener("click", () => {
+        watchCard.classList.remove("hidden");
+        btnRestoreWatch.classList.remove("visible");
+        if (window.soundFX) window.soundFX.playTelemetryClick();
+      });
+    }
+
     // Solar Body focus selector
     if (this.solarBodySelect) {
       this.solarBodySelect.addEventListener("change", (e) => {

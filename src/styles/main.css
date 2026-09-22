@@ -1120,3 +1120,51 @@ body.zen-mode .zen-toggle-btn:hover {
   background: var(--color-purple);
   color: #fff;
 }
+
+/* DRAGGABLE & REMOVABLE ASTEROID WATCH CARD */
+.asteroid-watch-card {
+  position: absolute;
+  top: 80px;
+  left: 24px;
+  z-index: 50;
+  transition: opacity 0.3s ease;
+  will-change: left, top, transform;
+}
+.asteroid-watch-card.hidden {
+  opacity: 0;
+  pointer-events: none;
+  transform: scale(0.95);
+}
+.watch-card-header {
+  cursor: grab;
+}
+.watch-card-header:active {
+  cursor: grabbing;
+}
+.btn-close-card {
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 16px;
+  cursor: pointer;
+  padding: 4px;
+  margin-left: 8px;
+  border-radius: 4px;
+}
+.btn-close-card:hover {
+  color: var(--color-hazard-alert);
+  background: rgba(244, 63, 94, 0.1);
+}
+.hud-btn-restore {
+  position: fixed;
+  top: 80px;
+  left: 24px;
+  z-index: 40;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+.hud-btn-restore.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
